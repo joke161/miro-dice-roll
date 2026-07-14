@@ -19,9 +19,9 @@ A collection of **Tampermonkey** userscripts that add fully interactive dice rol
 
 ### 📦 Included Scripts
 This repository contains three different versions of the script. **Note: `miro-dice-roll-panel-only.js` is the main and actively updated version.**
-1. `miro-dice-roll-panel-only.js` - **Main Version (Actively Updated)**. The most polished version containing the floating settings panel and complete feature set.
-2. `miro-dice-roll.js` - **Older Version (Full Experience)**. An older but functional version including both physics and a basic settings panel.
-3. `miro-dice-roll-modal-only.js` - **Older Version (Core 3D Only)**. An older functional version containing just the 3D dice modal and physics engine.
+1. `miro-dice-roll-panel-only.js` - **Main Version (Actively Updated)**. The most polished version containing the modern floating settings panel, glassmorphism UI, and the complete feature set.
+2. `miro-dice-roll.js` - **Older Version (Basic UI)**. An older but functional version containing the core rolling logic and a simpler HTML UI panel.
+3. `miro-dice-roll-modal-only.js` - **Older Version (Logic Only)**. An older functional version containing just the core dice rolling logic without the floating settings UI.
 
 ### ⚙️ Installation (Tampermonkey)
 1. Install the [Tampermonkey](https://www.tampermonkey.net/) extension for your browser.
@@ -53,9 +53,9 @@ This repository contains three different versions of the script. **Note: `miro-d
 
 ### 📦 Состав скриптов
 В этом репозитории находятся три версии скрипта. **Внимание: `miro-dice-roll-panel-only.js` — это основная и активно обновляемая версия.**
-1. `miro-dice-roll-panel-only.js` - **Основная версия (Актуальная)**. Самая проработанная версия, включающая современную плавающую панель настроек и весь актуальный функционал.
-2. `miro-dice-roll.js` - **Старая версия (Полная)**. Старая, но рабочая версия, включающая физику и базовую панель настроек.
-3. `miro-dice-roll-modal-only.js` - **Старая версия (Только 3D)**. Старая рабочая версия, содержащая только физический движок и 3D-кубики.
+1. `miro-dice-roll-panel-only.js` - **Основная версия (Актуальная)**. Самая проработанная версия, включающая современную плавающую панель настроек, стеклянный UI и весь актуальный функционал.
+2. `miro-dice-roll.js` - **Старая версия (Базовый UI)**. Старая, но рабочая версия, включающая логику бросков и более простую HTML-панель настроек.
+3. `miro-dice-roll-modal-only.js` - **Старая версия (Только логика)**. Старая рабочая версия, содержащая только логику бросков (создание стикеров с числами/символами) без плавающей панели настроек.
 
 ### ⚙️ Установка (Tampermonkey)
 1. Установите расширение [Tampermonkey](https://www.tampermonkey.net/) для вашего браузера.
