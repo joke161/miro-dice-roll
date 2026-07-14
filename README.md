@@ -6,14 +6,15 @@
 
 ## 🇬🇧 English Guide
 
-A collection of **Tampermonkey** userscripts that add fully interactive, physics-based 3D dice rolling features directly to your Miro boards. Perfect for tabletop games, RPGs, or agile estimation sessions!
+A collection of **Tampermonkey** userscripts that add fully interactive dice rolling features directly to your Miro boards. Perfect for tabletop games, RPGs, or agile estimation sessions!
 
 ### ✨ Features
-- **Interactive 3D Physics:** Roll physical 3D dice directly on top of your Miro board.
+- **Native Miro Integration:** Rolls are simulated by spawning actual Miro shapes (like sticky notes) directly on the board using the Miro Web SDK.
+- **Roll Animation:** Simulates a roll by rapidly cycling through numbers and colors before smoothly landing on the final result.
 - **Glassmorphism UI:** A beautiful, responsive settings panel with glass themes, custom accent colors, and smooth interactive lighting effects.
 - **Customizable Dice:** Support for standard D6 dice and custom-faced dice.
 - **Advanced Roll Logic:** Need to roll exactly 5 dice? Or roll 10 dice and count how many scored above a 4? The custom logic panel handles it.
-- **Performance Mode:** Easily toggle 3D effects on/off for smoother performance on low-end hardware.
+- **Performance Mode:** Easily toggle the visual rolling animation on/off for instant results.
 - **Drag & Drop:** Fully draggable interface that can be minimized to a floating action button (FAB).
 
 ### 📦 Included Scripts
@@ -39,14 +40,15 @@ This repository contains three different versions of the script. **Note: `miro-d
 
 ## 🇷🇺 Руководство на русском
 
-Набор пользовательских скриптов для **Tampermonkey**, которые добавляют полноценный интерактивный 3D-бросок кубиков с физикой прямо на ваши доски в Miro. Идеально подходит для настольных игр, RPG или сессий планирования!
+Набор пользовательских скриптов для **Tampermonkey**, которые добавляют полноценный интерактивный бросок кубиков прямо на ваши доски в Miro. Идеально подходит для настольных игр, RPG или сессий планирования!
 
 ### ✨ Особенности
-- **Интерактивная 3D-физика:** Бросайте физические 3D-кубики прямо поверх доски Miro.
+- **Нативная интеграция с Miro:** Броски имитируются путем создания реальных фигур Miro (стикеров) прямо на доске с помощью Miro Web SDK.
+- **Анимация броска:** Бросок симулируется за счет быстрого перебора чисел и цветов стикеров, прежде чем выдать финальный результат.
 - **Стеклянный интерфейс (Glassmorphism):** Красивая панель настроек со стеклянной темой, настраиваемыми цветами акцентов и плавными интерактивными эффектами подсветки.
 - **Настраиваемые кубики:** Поддержка стандартных (D6) и кастомных кубиков.
 - **Умная логика бросков:** Нужно бросить ровно 5 кубиков? Или бросить 10 и посчитать, сколько из них выпало больше 4? Кастомная логика легко с этим справится.
-- **Режим производительности:** Возможность отключить 3D-эффекты для плавной работы на слабых устройствах.
+- **Режим производительности:** Возможность отключить визуальную анимацию броска для мгновенной выдачи результатов.
 - **Drag & Drop:** Полностью перетаскиваемый интерфейс, который можно свернуть в небольшую плавающую кнопку (FAB).
 
 ### 📦 Состав скриптов
