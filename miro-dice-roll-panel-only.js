@@ -1134,10 +1134,11 @@
     }
   }
 
-  async function createCustomDieShape(miroSdk, value, x, y) {
+  async function createCustomDieShape(miroSdk, value, x, y, faceCount) {
+    const textContent = faceCount === 6 ? faceByIndex(value - 1) : String(value);
     return miroSdk.board.createShape({
       shape: 'rectangle',
-      content: String(value),
+      content: textContent,
       x,
       y,
       width: CUSTOM_DICE_BLOCK_WIDTH,
@@ -1155,9 +1156,9 @@
     });
   }
 
-  async function updateCustomDieShape(widget, value) {
+  async function updateCustomDieShape(widget, value, faceCount) {
     try {
-      widget.content = String(value);
+      widget.content = faceCount === 6 ? faceByIndex(value - 1) : String(value);
       await widget.sync();
     } catch {
       // Widget was deleted during animation
@@ -1169,7 +1170,8 @@
     diceCount,
     anchorPoint,
     initialValues,
-    isCustom
+    isCustom,
+    faceCount
   ) {
     const widgets = [];
 
@@ -1187,7 +1189,7 @@
       );
 
       if (isCustom) {
-        widgets.push(await createCustomDieShape(miroSdk, initialValues[i], x, y));
+        widgets.push(await createCustomDieShape(miroSdk, initialValues[i], x, y, faceCount));
       } else {
         widgets.push(await createDieTextBlock(miroSdk, initialValues[i], x, y));
       }
@@ -1235,7 +1237,7 @@
       }
 
       if (isCustom) {
-        await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex]);
+        await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
       } else {
         await updateDieBlock(widgets[dieIndex], displayValues[dieIndex]);
       }
@@ -1278,7 +1280,8 @@
       diceCount,
       groupCenter,
       initialValues,
-      isCustom
+      isCustom,
+      faceCount
     );
 
     if (diceCount === 1) {
