@@ -1180,18 +1180,20 @@
         await sleep(SPAWN_DELAY_MS);
       }
 
+      const isShape = isCustom && faceCount !== 6;
       const { x, y } = getDieBlockPosition(
         anchorPoint.x,
         anchorPoint.y,
         i,
         diceCount,
-        isCustom
+        isShape
       );
 
-      if (isCustom) {
+      if (isShape) {
         widgets.push(await createCustomDieShape(miroSdk, initialValues[i], x, y, faceCount));
       } else {
-        widgets.push(await createDieTextBlock(miroSdk, initialValues[i], x, y));
+        const faceIndex = isCustom ? initialValues[i] - 1 : initialValues[i];
+        widgets.push(await createDieTextBlock(miroSdk, faceIndex, x, y));
       }
     }
 
@@ -1236,10 +1238,12 @@
         frozen[dieIndex] = true;
       }
 
-      if (isCustom) {
+      const isShape = isCustom && faceCount !== 6;
+      if (isShape) {
         await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
       } else {
-        await updateDieBlock(widgets[dieIndex], displayValues[dieIndex]);
+        const faceIndex = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
+        await updateDieBlock(widgets[dieIndex], faceIndex);
       }
 
       cyclePointer += 1;
@@ -1821,33 +1825,40 @@
           }
         }
 
-        // Масштабируем превью, вычисляя точные размеры, чтобы рамки не пропадали
-        const rowW = fabDiceCount * CUSTOM_DICE_BLOCK_WIDTH + (Math.max(0, fabDiceCount - 1)) * CUSTOM_DICE_GAP;
-        const MAX_PREVIEW_WIDTH = 150;
-        const MAX_PREVIEW_HEIGHT = 46;
-        const scaleX = MAX_PREVIEW_WIDTH / Math.max(1, rowW);
-        const scaleY = MAX_PREVIEW_HEIGHT / Math.max(1, CUSTOM_DICE_BLOCK_WIDTH);
-        const scale = Math.min(1, scaleX, scaleY);
+        if (customFaceCount === 6) {
+          const faces = boxes.map((v) => faceByIndex(v - 1));
+          preview.innerHTML = faces
+            .map((f) => `<span class="mdr-die-pop" style="font-size:34px;line-height:1;display:inline-block">${f}</span>`)
+            .join('');
+        } else {
+          // Масштабируем превью, вычисляя точные размеры, чтобы рамки не пропадали
+          const rowW = fabDiceCount * CUSTOM_DICE_BLOCK_WIDTH + (Math.max(0, fabDiceCount - 1)) * CUSTOM_DICE_GAP;
+          const MAX_PREVIEW_WIDTH = 150;
+          const MAX_PREVIEW_HEIGHT = 46;
+          const scaleX = MAX_PREVIEW_WIDTH / Math.max(1, rowW);
+          const scaleY = MAX_PREVIEW_HEIGHT / Math.max(1, CUSTOM_DICE_BLOCK_WIDTH);
+          const scale = Math.min(1, scaleX, scaleY);
 
-        const pSize = CUSTOM_DICE_BLOCK_WIDTH * scale;
-        const pGap = CUSTOM_DICE_GAP * scale;
-        // Делаем шрифт крупнее, убираем рамки, чтобы цифры лучше читались в превью
-        const pFontSize = Math.max(16, pSize * 1.2);
+          const pSize = CUSTOM_DICE_BLOCK_WIDTH * scale;
+          const pGap = CUSTOM_DICE_GAP * scale;
+          // Делаем шрифт крупнее, убираем рамки, чтобы цифры лучше читались в превью
+          const pFontSize = Math.max(16, pSize * 1.2);
 
-        preview.innerHTML = `<div style="display: flex; gap: ${pGap}px; justify-content: center; align-items: center;">
-          ${boxes.map((v) => `<div class="mdr-die-pop" style="
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: ${pSize}px;
-            height: ${pSize}px;
-            font-family: Arial, sans-serif;
-            font-size: ${pFontSize}px;
-            font-weight: bold;
-            box-sizing: border-box;
-            color: #1a1a1a;
-          ">${v}</div>`).join('')}
-        </div>`;
+          preview.innerHTML = `<div style="display: flex; gap: ${pGap}px; justify-content: center; align-items: center;">
+            ${boxes.map((v) => `<div class="mdr-die-pop" style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: ${pSize}px;
+              height: ${pSize}px;
+              font-family: Arial, sans-serif;
+              font-size: ${pFontSize}px;
+              font-weight: bold;
+              box-sizing: border-box;
+              color: #1a1a1a;
+            ">${v}</div>`).join('')}
+          </div>`;
+        }
       } else {
         if (fabPreviewShowResult) {
           const faces = fabFinalIndices.map((i) => faceByIndex(i));
