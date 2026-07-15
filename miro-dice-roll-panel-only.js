@@ -1749,13 +1749,13 @@
     document.body.appendChild(ghostWrapper);
 
     const refreshGhost = () => {
-      if (isCustomDice) {
+      if (isCustomDice && customFaceCount !== 6) {
         const html = fabCustomFinalValues
           .map((v) => `<div class="mdr-ghost-custom-box">${v}</div>`)
           .join('');
         ghostInner.innerHTML = `<div class="mdr-custom-row">${html}</div>`;
       } else {
-        const faces = fabFinalIndices.map((i) => faceByIndex(i));
+        const faces = isCustomDice ? fabCustomFinalValues.map((v) => faceByIndex(v - 1)) : fabFinalIndices.map((i) => faceByIndex(i));
         ghostInner.innerHTML = `<div style="display: flex; flex-direction: row;">
           ${faces.map((f, idx) => `<div style="width: ${DICE_BLOCK_WIDTH}px; height: ${DICE_BLOCK_WIDTH}px; display: flex; align-items: center; justify-content: center; font-size: ${DICE_FONT_SIZE}px; line-height: 1; color: #1a1a1a; margin-left: ${idx > 0 ? DICE_GAP : 0}px;">${f}</div>`).join('')}
         </div>`;
@@ -1766,8 +1766,9 @@
       // Моментальное аппаратное следование за курсором
       ghostWrapper.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
       
-      const offsetX = isCustomDice ? (CUSTOM_DICE_BLOCK_WIDTH / 2) : (DICE_BLOCK_WIDTH / 2);
-      const offsetY = isCustomDice ? 0 : (DICE_BLOCK_WIDTH * 0.031); // Идеальное значение базлайна от пользователя
+      const isShape = isCustomDice && customFaceCount !== 6;
+      const offsetX = isShape ? (CUSTOM_DICE_BLOCK_WIDTH / 2) : (DICE_BLOCK_WIDTH / 2);
+      const offsetY = isShape ? 0 : (DICE_BLOCK_WIDTH * 0.031); // Идеальное значение базлайна от пользователя
 
       // Используем zoom, чтобы браузер рендерил векторный шрифт в нужном разрешении
       if ('zoom' in ghostInner.style) {
