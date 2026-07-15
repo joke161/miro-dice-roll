@@ -1391,7 +1391,7 @@
         <p class="mdr-label" style="margin-top:0;">Пресеты и свои грани</p>
         <div class="mdr-custom-dice-btn-group" style="margin-bottom: 6px;">
           <button type="button" class="mdr-custom-dice-btn" data-faces="4">d4</button>
-          <button type="button" class="mdr-custom-dice-btn" data-faces="8">d8</button>
+          <button type="button" class="mdr-custom-dice-btn" data-faces="6">d6</button>
           <button type="button" class="mdr-custom-dice-btn" data-faces="10">d10</button>
           <button type="button" class="mdr-custom-dice-btn" data-faces="20">d20</button>
         </div>
