@@ -2153,14 +2153,23 @@
       interactiveBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         triggerPop(interactiveBtn);
-        isInteractiveMode = !isInteractiveMode;
-        if (isInteractiveMode) {
-          isCustomDice = true;
+
+        const applyToggle = () => {
+          isInteractiveMode = !isInteractiveMode;
+          if (isInteractiveMode) {
+            isCustomDice = true;
+          }
+          generateCurrentRolls();
+          applyVisibility();
+          refreshFabUi();
+          saveAndPersist();
+        };
+
+        if (document.startViewTransition) {
+          document.startViewTransition(applyToggle);
+        } else {
+          applyToggle();
         }
-        generateCurrentRolls();
-        applyVisibility();
-        refreshFabUi();
-        saveAndPersist();
       });
     }
     updatePerfUi();
