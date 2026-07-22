@@ -1305,7 +1305,7 @@
 
       cyclePointer += 1;
       safetyTicks += 1;
-      await sleep(SPAWN_INTERVAL_MS);
+      await sleep(SPIN_INTERVAL_MS);
     }
   }
 
@@ -1903,30 +1903,18 @@
         const boxes = [...interactiveValues];
         const isShape = isCustomDice && customFaceCount !== 6;
         
-        // Dynamically scale down interactive dice to fit within a ~140px width container
-        const MAX_PREVIEW_WIDTH = 140;
-        const rawWidth = boxes.length * 36 + Math.max(0, boxes.length - 1) * 8;
-        const scale = Math.min(1, MAX_PREVIEW_WIDTH / Math.max(1, rawWidth));
-        const gap = 8 * scale;
-
-        preview.innerHTML = `<div style="display: flex; gap: ${gap}px; justify-content: center; align-items: center;">
+        preview.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;">
           ${boxes.map((v, idx) => {
             const face = isShape ? v : faceByIndex(v - 1);
             
-            const size = 36 * scale;
-            const fSizeNum = 20 * scale;
-            const fSizeUni = 38 * scale;
-            const arrowSize = 12 * scale;
-            const arrowGap = 2 * scale;
-            
             const style = isShape 
-              ? `width: ${size}px; height: ${size}px; font-size: ${fSizeNum}px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
-              : `font-size: ${fSizeUni}px; line-height: 1;`;
+              ? `width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
+              : `font-size: 44px; line-height: 1;`;
               
-            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: ${arrowGap}px;">
-              <button type="button" class="mdr-interactive-arrow mdr-arrow-up" style="font-size: ${arrowSize}px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▲</button>
+            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+              <button type="button" class="mdr-interactive-arrow mdr-arrow-up" style="font-size: 14px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▲</button>
               <div class="mdr-die-pop mdr-interactive-die" style="${style}">${face}</div>
-              <button type="button" class="mdr-interactive-arrow mdr-arrow-down" style="font-size: ${arrowSize}px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▼</button>
+              <button type="button" class="mdr-interactive-arrow mdr-arrow-down" style="font-size: 14px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▼</button>
             </div>`;
           }).join('')}
         </div>`;
