@@ -819,6 +819,15 @@
         to { opacity: 1; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4)); }
       }
 
+      @keyframes mdrGhostInnerPop {
+        0% { transform: scale(0.5); opacity: 0; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      #${MODAL_ROOT_ID}-ghost.is-active #${MODAL_ROOT_ID}-ghost-inner {
+        animation: mdrGhostInnerPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+
       @keyframes mdrShake {
         0%, 100% { transform: scale(var(--drag-scale)) rotate(-5deg) translateX(0); filter: blur(0px); }
         25% { transform: scale(var(--drag-scale)) rotate(-15deg) translateX(-10px); filter: blur(2px); }
@@ -1192,7 +1201,7 @@
   }
 
   async function createCustomDieShape(miroSdk, value, x, y, faceCount) {
-    const textContent = faceCount === 6 ? faceByIndex(value - 1) : String(value);
+    const textContent = String(value);
     return miroSdk.board.createShape({
       shape: 'rectangle',
       content: textContent,
@@ -1215,7 +1224,7 @@
 
   async function updateCustomDieShape(widget, value, faceCount) {
     try {
-      widget.content = faceCount === 6 ? faceByIndex(value - 1) : String(value);
+      widget.content = String(value);
       await widget.sync();
     } catch {
       // Widget was deleted during animation
@@ -1237,7 +1246,7 @@
         await sleep(SPAWN_DELAY_MS);
       }
 
-      const isShape = isCustom && faceCount !== 6;
+      const isShape = isCustom;
       const { x, y } = getDieBlockPosition(
         anchorPoint.x,
         anchorPoint.y,
@@ -1295,7 +1304,7 @@
         frozen[dieIndex] = true;
       }
 
-      const isShape = isCustom && faceCount !== 6;
+      const isShape = isCustom;
       if (isShape) {
         await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
       } else {
@@ -1854,7 +1863,7 @@
       // Моментальное аппаратное следование за курсором
       ghostWrapper.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
       
-      const isShape = isCustomDice && customFaceCount !== 6;
+      const isShape = isCustomDice;
       const offsetX = isShape ? (CUSTOM_DICE_BLOCK_WIDTH / 2) : (DICE_BLOCK_WIDTH / 2);
       const offsetY = isShape ? 0 : (DICE_BLOCK_WIDTH * 0.031); // Идеальное значение базлайна от пользователя
 
@@ -1901,7 +1910,7 @@
     const refreshFabPreview = () => {
       if (isInteractiveMode) {
         const boxes = [...interactiveValues];
-        const isShape = isCustomDice && customFaceCount !== 6;
+        const isShape = isCustomDice;
         
         preview.innerHTML = `<div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
           ${boxes.map((v, idx) => {
@@ -2093,6 +2102,7 @@
     // --- Persistence ---
     const saveAndPersist = () => {
       saveFabSettings({
+        interactiveMode: isInteractiveMode,
         perfMode: fabPerfMode,
         diceCount: fabDiceCount,
         sixCount: fabSixCount,
@@ -2586,7 +2596,12 @@
         triggerPop(wrap);
         if (isCustomDice) fabCustomFinalValues[idx] = interactiveValues[idx];
         else fabFinalIndices[idx] = interactiveValues[idx] - 1;
-        refreshFabPreview();
+        
+        const dieNode = wrap.querySelector('.mdr-die-pop');
+        if (dieNode) {
+          dieNode.textContent = isCustomDice ? interactiveValues[idx] : faceByIndex(interactiveValues[idx] - 1);
+        }
+        triggerPop(wrap);
         saveAndPersist();
       }
     });
