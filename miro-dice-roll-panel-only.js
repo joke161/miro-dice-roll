@@ -452,10 +452,6 @@
         color: #0f172a;
       }
 
-      #${MODAL_ROOT_ID}-panel-interactive-btn.is-active {
-        color: #fff;
-        background: var(--accent-color, #4262ff);
-      }
 
       /* ====== Interactive Mode ====== */
       .mdr-global-btn {
@@ -2057,8 +2053,8 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
-        panel.style.width = '280px';
-        panel.style.minWidth = '280px';
+        panel.style.width = '320px';
+        panel.style.minWidth = '320px';
         if (totalDiceWrap) totalDiceWrap.style.display = 'none';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
         if (customLogicWrap) customLogicWrap.style.display = 'none';
