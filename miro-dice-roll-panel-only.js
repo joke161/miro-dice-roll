@@ -2559,6 +2559,14 @@
       stopGhostPolling();
     };
 
+    const performSmoothDiceChange = (action) => {
+      if (document.startViewTransition) {
+        document.startViewTransition(() => { action(); });
+      } else {
+        action();
+      }
+    };
+
     dragArea.addEventListener('pointerdown', startDiceDrag);
 
     // --- Interactive Mode Events ---
@@ -2587,26 +2595,28 @@
         saveAndPersist();
       } else {
         e.preventDefault();
-        if (e.deltaY < 0) {
-          if (fabDiceCount < MAX_DICE) {
-            fabDiceCount++;
-            const maxFaces = isCustomDice ? customFaceCount : 6;
-            interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
-            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-            else fabFinalIndices = interactiveValues.map(v => v - 1);
-            refreshFabUi();
-            saveAndPersist();
+        performSmoothDiceChange(() => {
+          if (e.deltaY < 0) {
+            if (fabDiceCount < MAX_DICE) {
+              fabDiceCount++;
+              const maxFaces = isCustomDice ? customFaceCount : 6;
+              interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+              if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+              else fabFinalIndices = interactiveValues.map(v => v - 1);
+              refreshFabUi();
+              saveAndPersist();
+            }
+          } else {
+            if (fabDiceCount > MIN_DICE) {
+              fabDiceCount--;
+              interactiveValues.pop();
+              if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+              else fabFinalIndices = interactiveValues.map(v => v - 1);
+              refreshFabUi();
+              saveAndPersist();
+            }
           }
-        } else {
-          if (fabDiceCount > MIN_DICE) {
-            fabDiceCount--;
-            interactiveValues.pop();
-            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-            else fabFinalIndices = interactiveValues.map(v => v - 1);
-            refreshFabUi();
-            saveAndPersist();
-          }
-        }
+        });
       }
     }, { passive: false });
 
@@ -2648,31 +2658,35 @@
     if (intPlusBtn) {
       intPlusBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (fabDiceCount < MAX_DICE) {
-          fabDiceCount++;
-          const maxFaces = isCustomDice ? customFaceCount : 6;
-          interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
-          if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-          else fabFinalIndices = interactiveValues.map(v => v - 1);
-          triggerPop(intPlusBtn);
-          refreshFabUi();
-          saveAndPersist();
-        }
+        performSmoothDiceChange(() => {
+          if (fabDiceCount < MAX_DICE) {
+            fabDiceCount++;
+            const maxFaces = isCustomDice ? customFaceCount : 6;
+            interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+            else fabFinalIndices = interactiveValues.map(v => v - 1);
+            triggerPop(intPlusBtn);
+            refreshFabUi();
+            saveAndPersist();
+          }
+        });
       });
     }
 
     if (intMinusBtn) {
       intMinusBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (fabDiceCount > MIN_DICE) {
-          fabDiceCount--;
-          interactiveValues.pop();
-          if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-          else fabFinalIndices = interactiveValues.map(v => v - 1);
-          triggerPop(intMinusBtn);
-          refreshFabUi();
-          saveAndPersist();
-        }
+        performSmoothDiceChange(() => {
+          if (fabDiceCount > MIN_DICE) {
+            fabDiceCount--;
+            interactiveValues.pop();
+            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+            else fabFinalIndices = interactiveValues.map(v => v - 1);
+            triggerPop(intMinusBtn);
+            refreshFabUi();
+            saveAndPersist();
+          }
+        });
       });
     }
     document.addEventListener('pointermove', moveDiceDrag, { capture: true });
