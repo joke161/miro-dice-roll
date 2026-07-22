@@ -454,6 +454,20 @@
 
 
       /* ====== Interactive Mode ====== */
+      #${MODAL_ROOT_ID}-interactive-minus,
+      #${MODAL_ROOT_ID}-interactive-plus {
+        position: absolute;
+        top: 2px;
+        z-index: 2;
+        background: transparent;
+      }
+      #${MODAL_ROOT_ID}-interactive-minus {
+        left: 2px;
+      }
+      #${MODAL_ROOT_ID}-interactive-plus {
+        right: 2px;
+      }
+
       .mdr-global-btn {
         background: transparent;
         border: none;
@@ -2070,24 +2084,18 @@
         // Toggle interactive preview buttons
         if (intMinusBtn) intMinusBtn.style.display = 'flex';
         if (intPlusBtn) intPlusBtn.style.display = 'flex';
-        
-        const dragArea = panel.querySelector(`#${MODAL_ROOT_ID}-drag-area`);
-        const previewRow = panel.querySelector(`#${MODAL_ROOT_ID}-preview-row`);
-        if (dragArea) dragArea.style.padding = '12px 8px';
-        if (previewRow) previewRow.style.alignItems = 'center';
       } else {
         panel.style.width = '192px';
         panel.style.minWidth = '';
         if (totalDiceWrap) totalDiceWrap.style.display = '';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = '';
         if (customLogicWrap) customLogicWrap.style.display = '';
+        if (sectionD6) sectionD6.classList.remove('is-hidden');
+        if (sectionCustom) sectionCustom.classList.add('is-hidden');
+
         if (intMinusBtn) intMinusBtn.style.display = 'none';
         if (intPlusBtn) intPlusBtn.style.display = 'none';
 
-        const dragArea = panel.querySelector(`#${MODAL_ROOT_ID}-drag-area`);
-        const previewRow = panel.querySelector(`#${MODAL_ROOT_ID}-preview-row`);
-        if (dragArea) dragArea.style.padding = '';
-        if (previewRow) previewRow.style.alignItems = '';
         // Let refreshToggleState handle sectionD6, customLogicWrap, etc.
         refreshToggleState();
       }
@@ -2577,6 +2585,28 @@
         }
         triggerPop(wrap);
         saveAndPersist();
+      } else {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+          if (fabDiceCount < MAX_DICE) {
+            fabDiceCount++;
+            const maxFaces = isCustomDice ? customFaceCount : 6;
+            interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+            else fabFinalIndices = interactiveValues.map(v => v - 1);
+            refreshFabUi();
+            saveAndPersist();
+          }
+        } else {
+          if (fabDiceCount > MIN_DICE) {
+            fabDiceCount--;
+            interactiveValues.pop();
+            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+            else fabFinalIndices = interactiveValues.map(v => v - 1);
+            refreshFabUi();
+            saveAndPersist();
+          }
+        }
       }
     }, { passive: false });
 
