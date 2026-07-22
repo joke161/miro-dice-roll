@@ -94,6 +94,8 @@
 
       return {
         perfMode: p.perfMode === true || p.perfMode === 'true',
+        interactiveMode: p.interactiveMode === true || p.interactiveMode === 'true',
+        interactiveValues: Array.isArray(p.interactiveValues) ? p.interactiveValues : [],
         diceCount: Number.isNaN(diceCount) || diceCount < MIN_DICE || diceCount > MAX_DICE ? DEFAULT_DICE_COUNT : diceCount,
         sixCount: Number.isNaN(sixCount) || sixCount < 0 || sixCount > MAX_DICE ? 0 : sixCount,
         strictSixCount: p.strictSixCount !== false,
@@ -1898,15 +1900,15 @@
         const boxes = [...interactiveValues];
         const isShape = isCustomDice && customFaceCount !== 6;
         
-        preview.innerHTML = `<div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+        preview.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; width: 100%;">
           ${boxes.map((v, idx) => {
             const face = isShape ? v : faceByIndex(v - 1);
             
             const style = isShape 
               ? `width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
-              : `font-size: 44px; line-height: 1;`;
+              : `width: 36px; height: 36px; font-size: 44px; display: flex; align-items: center; justify-content: center; line-height: 1;`;
               
-            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
               <button type="button" class="mdr-interactive-arrow mdr-arrow-up" style="font-size: 14px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▲</button>
               <div class="mdr-die-pop mdr-interactive-die" style="${style}">${face}</div>
               <button type="button" class="mdr-interactive-arrow mdr-arrow-down" style="font-size: 14px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▼</button>
@@ -2042,8 +2044,6 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
-        panel.style.width = 'max-content';
-        panel.style.minWidth = '240px';
         if (totalDiceWrap) totalDiceWrap.style.display = 'none';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
         if (customLogicWrap) customLogicWrap.style.display = 'none';
@@ -2078,6 +2078,7 @@
     const saveAndPersist = () => {
       saveFabSettings({
         interactiveMode: isInteractiveMode,
+        interactiveValues: interactiveValues,
         perfMode: fabPerfMode,
         diceCount: fabDiceCount,
         sixCount: fabSixCount,
@@ -2387,26 +2388,32 @@
       panelDragOffX = e.clientX - panelX;
       panelDragOffY = e.clientY - panelY;
 
-      header.setPointerCapture(e.pointerId);
+      try {
+        header.setPointerCapture(e.pointerId);
+      } catch (err) {}
       e.preventDefault();
-    });
 
-    header.addEventListener('pointermove', (e) => {
-      if (!isPanelDragging) return;
+      const handleMove = (moveEvt) => {
+        if (!isPanelDragging) return;
+        panelX = Math.max(0, moveEvt.clientX - panelDragOffX);
+        panelY = Math.max(0, moveEvt.clientY - panelDragOffY);
+        panel.style.left = `${panelX}px`;
+        panel.style.top = `${panelY}px`;
+      };
 
-      panelX = Math.max(0, e.clientX - panelDragOffX);
-      panelY = Math.max(0, e.clientY - panelDragOffY);
+      const handleUp = () => {
+        if (!isPanelDragging) return;
+        isPanelDragging = false;
+        saveAndPersist();
+        panel.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
+        panel.style.transition = 'transform 0.4s ease-out';
+        
+        window.removeEventListener('pointermove', handleMove, { capture: true });
+        window.removeEventListener('pointerup', handleUp, { capture: true });
+      };
 
-      panel.style.left = `${panelX}px`;
-      panel.style.top = `${panelY}px`;
-    });
-
-    header.addEventListener('pointerup', () => {
-      if (!isPanelDragging) return;
-      isPanelDragging = false;
-      saveAndPersist();
-      panel.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
-      panel.style.transition = 'transform 0.4s ease-out';
+      window.addEventListener('pointermove', handleMove, { capture: true });
+      window.addEventListener('pointerup', handleUp, { capture: true });
     });
 
     // --- Mouse Glow Effect ---
