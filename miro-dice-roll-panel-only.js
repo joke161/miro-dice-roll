@@ -1527,7 +1527,6 @@
     const preview = panel.querySelector(`#${MODAL_ROOT_ID}-drag-preview`);
     const dragArea = panel.querySelector(`#${MODAL_ROOT_ID}-drag-area`);
     const rerollBtn = panel.querySelector(`#${MODAL_ROOT_ID}-reroll-btn`);
-    const previewToggleBtn = panel.querySelector(`#${MODAL_ROOT_ID}-preview-toggle-btn`);
     const header = panel.querySelector(`#${MODAL_ROOT_ID}-panel-header`);
     const interactiveBtn = panel.querySelector(`#${MODAL_ROOT_ID}-panel-interactive-btn`);
     const closeBtn = panel.querySelector(`#${MODAL_ROOT_ID}-panel-close-btn`);
