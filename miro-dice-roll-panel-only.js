@@ -53,7 +53,7 @@
   /** Последние экранные координаты курсора */
   let lastClientX = null;
   let lastClientY = null;
-  
+
   let rollingCount = 0;
 
   const VIEWPORT_CACHE_TTL = 50; // Ускоряем кэш зума до 20 FPS для мгновенной реакции
@@ -237,7 +237,7 @@
 
     if (customMode === 'exact') {
       const positions = pickRandomPositions(diceCount, customExactCount);
-      
+
       return Array.from({ length: diceCount }, (_, i) => {
         if (positions.has(i)) {
           return customExactFace;
@@ -1331,38 +1331,38 @@
     rollingCount++;
     try {
 
-    let finalValues;
-    let initialValues;
+      let finalValues;
+      let initialValues;
 
-    if (isCustom) {
-      finalValues = customFinalValues;
-      initialValues = Array.from({ length: diceCount }, () => randomInt(1, faceCount));
-    } else {
-      finalValues = finalIndicesOverride ?? buildFinalIndices(diceCount, perDie, strictSixCount);
-      initialValues = Array.from({ length: diceCount }, () => randomDieIndex());
-    }
+      if (isCustom) {
+        finalValues = customFinalValues;
+        initialValues = Array.from({ length: diceCount }, () => randomInt(1, faceCount));
+      } else {
+        finalValues = finalIndicesOverride ?? buildFinalIndices(diceCount, perDie, strictSixCount);
+        initialValues = Array.from({ length: diceCount }, () => randomDieIndex());
+      }
 
-    const widgets = await spawnDiceBlocksSequentially(
-      miroSdk,
-      diceCount,
-      groupCenter,
-      initialValues,
-      isCustom,
-      faceCount
-    );
+      const widgets = await spawnDiceBlocksSequentially(
+        miroSdk,
+        diceCount,
+        groupCenter,
+        initialValues,
+        isCustom,
+        faceCount
+      );
 
-    if (diceCount === 1) {
-      await sleep(SPAWN_DELAY_MS);
-    }
+      if (diceCount === 1) {
+        await sleep(SPAWN_DELAY_MS);
+      }
 
-    await runSequentialSpinAnimation(widgets, finalValues, isCustom, faceCount);
+      await runSequentialSpinAnimation(widgets, finalValues, isCustom, faceCount);
 
-    if (isCustom) {
-      console.log(`[Miro Dice] Custom Roll: ${finalValues.join('  ')}`);
-    } else {
-      console.log(`[Miro Dice] D6 Roll: ${finalValues.map((i) => faceByIndex(i)).join('  ')}`);
-    }
-    
+      if (isCustom) {
+        console.log(`[Miro Dice] Custom Roll: ${finalValues.join('  ')}`);
+      } else {
+        console.log(`[Miro Dice] D6 Roll: ${finalValues.map((i) => faceByIndex(i)).join('  ')}`);
+      }
+
     } finally {
       rollingCount--;
     }
@@ -1556,35 +1556,35 @@
       el.classList.add('is-smooth');
       const fill = el.querySelector('.mdr-cs-fill');
       const thumb = el.querySelector('.mdr-cs-thumb');
-      
+
       let currentVal = initialVal;
       let currentMax = max;
       let isDragging = false;
       let onInputCb = null;
       let onChangeCb = null;
       let sliderRect = null;
-      
+
       const updateVisuals = (renderVal) => {
         const pct = currentMax === min ? 0 : Math.max(0, Math.min(1, (renderVal - min) / (currentMax - min)));
         fill.style.width = `${pct * 100}%`;
         thumb.style.left = `${pct * 100}%`;
       };
-      
+
       const handleMove = (e) => {
         if (!isDragging || !sliderRect) return;
         let pct = (e.clientX - sliderRect.left) / sliderRect.width;
         pct = Math.max(0, Math.min(1, pct));
         let rawVal = min + pct * (currentMax - min);
         let rounded = Number((Math.round(rawVal / step) * step).toFixed(4));
-        
+
         updateVisuals(rawVal);
-        
+
         if (rounded !== currentVal) {
           currentVal = rounded;
           if (onInputCb) onInputCb();
         }
       };
-      
+
       const handleUp = (e) => {
         if (!isDragging) return;
         isDragging = false;
@@ -1595,7 +1595,7 @@
         updateVisuals(currentVal);
         if (onChangeCb) onChangeCb();
       };
-      
+
       el.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         isDragging = true;
@@ -1617,19 +1617,19 @@
           currentVal = clamped;
           if (!isDragging) updateVisuals(currentVal);
           if (onInputCb) onInputCb();
-          
+
           if (wheelTimeout) clearTimeout(wheelTimeout);
           wheelTimeout = setTimeout(() => {
             if (onChangeCb) onChangeCb();
           }, 150);
         }
       });
-      
+
       updateVisuals(currentVal);
-      
+
       return {
         get value() { return currentVal; },
-        set value(v) { 
+        set value(v) {
           currentVal = Math.max(min, Math.min(currentMax, Number(v)));
           if (!isDragging) updateVisuals(currentVal);
         },
@@ -1837,7 +1837,7 @@
 
     const ghostInner = document.createElement('div');
     ghostInner.id = `${MODAL_ROOT_ID}-ghost-inner`;
-    
+
     ghost.appendChild(ghostInner);
     ghostWrapper.appendChild(ghost);
     document.body.appendChild(ghostWrapper);
@@ -1859,7 +1859,7 @@
     const updateGhostPos = (clientX, clientY) => {
       // Моментальное аппаратное следование за курсором
       ghostWrapper.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
-      
+
       const isShape = isCustomDice && customFaceCount !== 6;
       const offsetX = isShape ? (CUSTOM_DICE_BLOCK_WIDTH / 2) : (DICE_BLOCK_WIDTH / 2);
       const offsetY = isShape ? 0 : (DICE_BLOCK_WIDTH * 0.031); // Идеальное значение базлайна от пользователя
@@ -1908,21 +1908,21 @@
       if (isInteractiveMode) {
         const boxes = [...interactiveValues];
         const isShape = isCustomDice && customFaceCount !== 6;
-        
+
         preview.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; width: 100%;">
           ${boxes.map((v, idx) => {
-            const face = isShape ? v : faceByIndex(v - 1);
-            
-            const style = isShape 
-              ? `width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
-              : `width: 36px; height: 36px; font-size: 44px; display: flex; align-items: center; justify-content: center; line-height: 1;`;
-              
-            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
+          const face = isShape ? v : faceByIndex(v - 1);
+
+          const style = isShape
+            ? `width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
+            : `width: 36px; height: 36px; font-size: 44px; display: flex; align-items: center; justify-content: center; line-height: 1;`;
+
+          return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0;">
               <button type="button" class="mdr-interactive-arrow mdr-arrow-up" style="font-size: 14px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▲</button>
               <div class="mdr-die-pop mdr-interactive-die" style="${style}">${face}</div>
               <button type="button" class="mdr-interactive-arrow mdr-arrow-down" style="font-size: 14px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▼</button>
             </div>`;
-          }).join('')}
+        }).join('')}
         </div>`;
         return;
       }
@@ -2053,14 +2053,14 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
-        panel.style.width = '320px';
-        panel.style.minWidth = '320px';
+        panel.style.width = '300px';
+        panel.style.minWidth = '300px';
         if (totalDiceWrap) totalDiceWrap.style.display = 'none';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
         if (customLogicWrap) customLogicWrap.style.display = 'none';
         if (sectionD6) sectionD6.classList.add('is-hidden');
         if (sectionCustom) sectionCustom.classList.remove('is-hidden');
-        
+
         // Ensure sub-threshold/sub-exact are hidden even if logic says otherwise
         const subThreshold = panel.querySelector(`#${MODAL_ROOT_ID}-sub-threshold`);
         const subExact = panel.querySelector(`#${MODAL_ROOT_ID}-sub-exact`);
@@ -2070,6 +2070,11 @@
         // Toggle interactive preview buttons
         if (intMinusBtn) intMinusBtn.style.display = 'flex';
         if (intPlusBtn) intPlusBtn.style.display = 'flex';
+        
+        const dragArea = panel.querySelector(`#${MODAL_ROOT_ID}-drag-area`);
+        const previewRow = panel.querySelector(`#${MODAL_ROOT_ID}-preview-row`);
+        if (dragArea) dragArea.style.padding = '12px 8px';
+        if (previewRow) previewRow.style.alignItems = 'center';
       } else {
         panel.style.width = '192px';
         panel.style.minWidth = '';
@@ -2078,6 +2083,11 @@
         if (customLogicWrap) customLogicWrap.style.display = '';
         if (intMinusBtn) intMinusBtn.style.display = 'none';
         if (intPlusBtn) intPlusBtn.style.display = 'none';
+
+        const dragArea = panel.querySelector(`#${MODAL_ROOT_ID}-drag-area`);
+        const previewRow = panel.querySelector(`#${MODAL_ROOT_ID}-preview-row`);
+        if (dragArea) dragArea.style.padding = '';
+        if (previewRow) previewRow.style.alignItems = '';
         // Let refreshToggleState handle sectionD6, customLogicWrap, etc.
         refreshToggleState();
       }
@@ -2143,7 +2153,7 @@
     const themeSettingsPanel = panel.querySelector(`#${MODAL_ROOT_ID}-theme-settings`);
     const themeColorInput = panel.querySelector(`#${MODAL_ROOT_ID}-theme-color`);
     const accentColorInput = panel.querySelector(`#${MODAL_ROOT_ID}-accent-color`);
-    
+
     // Sliders initialized later
     let themeOpacitySlider = null;
     let themeBlurSlider = null;
@@ -2151,7 +2161,7 @@
     const updateThemeUi = () => {
       if (themeBtn) themeBtn.classList.toggle('is-active', fabTheme === 'glass');
       panel.classList.toggle('mdr-theme-glass', fabTheme === 'glass');
-      
+
       // Update CSS variables
       panel.style.setProperty('--glass-color', fabGlassColor);
       panel.style.setProperty('--glass-opacity-pct', `${fabGlassOpacity * 100}%`);
@@ -2254,7 +2264,7 @@
         if (next !== current) {
           el.value = String(next);
           el.dispatchEvent(new Event('input'));
-          
+
           if (wheelTimeout) clearTimeout(wheelTimeout);
           wheelTimeout = setTimeout(() => {
             el.dispatchEvent(new Event('change'));
@@ -2400,7 +2410,7 @@
 
       try {
         header.setPointerCapture(e.pointerId);
-      } catch (err) {}
+      } catch (err) { }
       e.preventDefault();
 
       const handleMove = (moveEvt) => {
@@ -2417,7 +2427,7 @@
         saveAndPersist();
         panel.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
         panel.style.transition = 'transform 0.4s ease-out';
-        
+
         window.removeEventListener('pointermove', handleMove, { capture: true });
         window.removeEventListener('pointerup', handleUp, { capture: true });
       };
@@ -2556,10 +2566,10 @@
         } else {
           interactiveValues[idx] = Math.max(1, interactiveValues[idx] - 1);
         }
-        
+
         if (isCustomDice) fabCustomFinalValues[idx] = interactiveValues[idx];
         else fabFinalIndices[idx] = interactiveValues[idx] - 1;
-        
+
         const dieNode = wrap.querySelector('.mdr-die-pop');
         if (dieNode) {
           const isShape = isCustomDice && customFaceCount !== 6;
@@ -2594,7 +2604,7 @@
         triggerPop(wrap);
         if (isCustomDice) fabCustomFinalValues[idx] = interactiveValues[idx];
         else fabFinalIndices[idx] = interactiveValues[idx] - 1;
-        
+
         const dieNode = wrap.querySelector('.mdr-die-pop');
         if (dieNode) {
           const isShape = isCustomDice && customFaceCount !== 6;
