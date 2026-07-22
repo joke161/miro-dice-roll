@@ -1606,6 +1606,12 @@
     const sectionD6 = panel.querySelector(`#${MODAL_ROOT_ID}-section-d6`);
     const sectionCustom = panel.querySelector(`#${MODAL_ROOT_ID}-section-custom`);
 
+    const totalDiceCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-total-dice-collapse`);
+    const typeToggleCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-type-toggle-collapse`);
+    const customLogicCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-collapse`);
+    const sectionD6Collapse = panel.querySelector(`#${MODAL_ROOT_ID}-section-d6-collapse`);
+    const sectionCustomCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-section-custom-collapse`);
+
     // D6 Controls
     const initSlider = (id, min, max, initialVal, step = 1) => {
       const el = panel.querySelector('#' + id);
@@ -1767,16 +1773,16 @@
         modeD6Label.classList.remove('is-active');
         modeCustomLabel.classList.add('is-active');
         if (!isInteractiveMode) {
-          sectionD6.classList.add('is-hidden');
-          sectionCustom.classList.remove('is-hidden');
+          if (sectionD6Collapse) sectionD6Collapse.classList.add('is-collapsed');
+          if (sectionCustomCollapse) sectionCustomCollapse.classList.remove('is-collapsed');
         }
       } else {
         typeToggle.classList.remove('is-on');
         modeD6Label.classList.add('is-active');
         modeCustomLabel.classList.remove('is-active');
         if (!isInteractiveMode) {
-          sectionD6.classList.remove('is-hidden');
-          sectionCustom.classList.add('is-hidden');
+          if (sectionD6Collapse) sectionD6Collapse.classList.remove('is-collapsed');
+          if (sectionCustomCollapse) sectionCustomCollapse.classList.add('is-collapsed');
         }
       }
 
@@ -2107,12 +2113,6 @@
         panel.classList.add('is-hidden');
       }
 
-      const totalDiceCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-total-dice-collapse`);
-      const typeToggleCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-type-toggle-collapse`);
-      const customLogicCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-collapse`);
-      const sectionD6Collapse = panel.querySelector(`#${MODAL_ROOT_ID}-section-d6-collapse`);
-      const sectionCustomCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-section-custom-collapse`);
-
       if (isInteractiveMode) {
         panel.style.width = '300px';
         panel.style.minWidth = '300px';
@@ -2134,16 +2134,22 @@
       } else {
         panel.style.width = '192px';
         panel.style.minWidth = '';
-        if (totalDiceWrap) totalDiceWrap.style.display = '';
-        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = '';
-        if (customLogicWrap) customLogicWrap.style.display = '';
-        if (sectionD6) sectionD6.classList.remove('is-hidden');
-        if (sectionCustom) sectionCustom.classList.add('is-hidden');
+        if (totalDiceCollapse) totalDiceCollapse.classList.remove('is-collapsed');
+        if (typeToggleCollapse) typeToggleCollapse.classList.remove('is-collapsed');
+        if (customLogicCollapse) customLogicCollapse.classList.remove('is-collapsed');
+        
+        if (isCustomDice) {
+          if (sectionD6Collapse) sectionD6Collapse.classList.add('is-collapsed');
+          if (sectionCustomCollapse) sectionCustomCollapse.classList.remove('is-collapsed');
+        } else {
+          if (sectionD6Collapse) sectionD6Collapse.classList.remove('is-collapsed');
+          if (sectionCustomCollapse) sectionCustomCollapse.classList.add('is-collapsed');
+        }
 
         if (intMinusBtn) intMinusBtn.style.display = 'none';
         if (intPlusBtn) intPlusBtn.style.display = 'none';
 
-        // Let refreshToggleState handle sectionD6, customLogicWrap, etc.
+        // Let refreshToggleState handle subThreshold and subExact visibility
         refreshToggleState();
       }
     };
