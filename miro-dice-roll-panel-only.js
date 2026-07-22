@@ -459,7 +459,7 @@
         100% { opacity: 1; transform: scale(1); }
       }
       .mdr-interactive-die-wrap {
-        animation: mdr-die-enter 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        animation: mdr-die-enter 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
 
       #${MODAL_ROOT_ID}-interactive-minus,
