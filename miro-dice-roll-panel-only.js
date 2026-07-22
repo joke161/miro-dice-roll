@@ -1903,16 +1903,30 @@
         const boxes = [...interactiveValues];
         const isShape = isCustomDice && customFaceCount !== 6;
         
-        preview.innerHTML = `<div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+        // Dynamically scale down interactive dice to fit within a ~140px width container
+        const MAX_PREVIEW_WIDTH = 140;
+        const rawWidth = boxes.length * 36 + Math.max(0, boxes.length - 1) * 8;
+        const scale = Math.min(1, MAX_PREVIEW_WIDTH / Math.max(1, rawWidth));
+        const gap = 8 * scale;
+
+        preview.innerHTML = `<div style="display: flex; gap: ${gap}px; justify-content: center; align-items: center;">
           ${boxes.map((v, idx) => {
             const face = isShape ? v : faceByIndex(v - 1);
+            
+            const size = 36 * scale;
+            const fSizeNum = 20 * scale;
+            const fSizeUni = 38 * scale;
+            const arrowSize = 12 * scale;
+            const arrowGap = 2 * scale;
+            
             const style = isShape 
-              ? `width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
-              : `font-size: 38px; line-height: 1;`;
-            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}">
-              <button type="button" class="mdr-interactive-arrow mdr-arrow-up">▲</button>
+              ? `width: ${size}px; height: ${size}px; font-size: ${fSizeNum}px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
+              : `font-size: ${fSizeUni}px; line-height: 1;`;
+              
+            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}" style="display: flex; flex-direction: column; align-items: center; gap: ${arrowGap}px;">
+              <button type="button" class="mdr-interactive-arrow mdr-arrow-up" style="font-size: ${arrowSize}px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▲</button>
               <div class="mdr-die-pop mdr-interactive-die" style="${style}">${face}</div>
-              <button type="button" class="mdr-interactive-arrow mdr-arrow-down">▼</button>
+              <button type="button" class="mdr-interactive-arrow mdr-arrow-down" style="font-size: ${arrowSize}px; padding: 0; background: none; border: none; cursor: pointer; color: #64748b;">▼</button>
             </div>`;
           }).join('')}
         </div>`;
@@ -2056,10 +2070,10 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
-        if (totalDiceWrap) totalDiceWrap.classList.add('is-hidden');
+        if (totalDiceWrap) totalDiceWrap.style.display = 'none';
+        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
+        if (customLogicWrap) customLogicWrap.style.display = 'none';
         if (sectionD6) sectionD6.classList.add('is-hidden');
-        if (customLogicWrap) customLogicWrap.classList.add('is-hidden');
-        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.classList.add('is-hidden');
         if (sectionCustom) sectionCustom.classList.remove('is-hidden');
         
         // Ensure sub-threshold/sub-exact are hidden even if logic says otherwise
@@ -2069,13 +2083,14 @@
         if (subExact) subExact.classList.add('is-hidden');
 
         // Toggle interactive preview buttons
-        if (intMinusBtn) intMinusBtn.classList.remove('is-hidden');
-        if (intPlusBtn) intPlusBtn.classList.remove('is-hidden');
+        if (intMinusBtn) intMinusBtn.style.display = 'flex';
+        if (intPlusBtn) intPlusBtn.style.display = 'flex';
       } else {
-        if (totalDiceWrap) totalDiceWrap.classList.remove('is-hidden');
-        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.classList.remove('is-hidden');
-        if (intMinusBtn) intMinusBtn.classList.add('is-hidden');
-        if (intPlusBtn) intPlusBtn.classList.add('is-hidden');
+        if (totalDiceWrap) totalDiceWrap.style.display = '';
+        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = '';
+        if (customLogicWrap) customLogicWrap.style.display = '';
+        if (intMinusBtn) intMinusBtn.style.display = 'none';
+        if (intPlusBtn) intPlusBtn.style.display = 'none';
         // Let refreshToggleState handle sectionD6, customLogicWrap, etc.
         refreshToggleState();
       }
