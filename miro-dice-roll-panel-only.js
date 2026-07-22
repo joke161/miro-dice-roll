@@ -317,6 +317,7 @@
       }
 
       #${MODAL_ROOT_ID}-panel {
+        view-transition-name: mdr-panel;
         position: fixed;
         z-index: 2147483645;
         display: flex;
