@@ -580,6 +580,7 @@
         color: #1e293b;
         pointer-events: none;
         flex: 1;
+        white-space: nowrap;
       }
 
       #${MODAL_ROOT_ID}-ghost.is-perf,
