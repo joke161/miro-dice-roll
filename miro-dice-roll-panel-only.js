@@ -139,6 +139,8 @@
         customExactFace: 20,
         customExactCount: 0,
         perfMode: false,
+        interactiveMode: false,
+        interactiveValues: [],
         panelTheme: 'solid',
         glassColor: '#dce6ff',
         glassOpacity: 0.6,
@@ -428,7 +430,7 @@
       }
 
       #${MODAL_ROOT_ID}-panel-theme-btn,
-      #${MODAL_ROOT_ID}-panel-perf-btn,
+      #${MODAL_ROOT_ID}-panel-interactive-btn,
       #${MODAL_ROOT_ID}-panel-close-btn {
         background: transparent;
         border: none;
@@ -443,15 +445,70 @@
       }
 
       #${MODAL_ROOT_ID}-panel-theme-btn:hover,
-      #${MODAL_ROOT_ID}-panel-perf-btn:hover,
+      #${MODAL_ROOT_ID}-panel-interactive-btn:hover,
       #${MODAL_ROOT_ID}-panel-close-btn:hover {
         background: #f1f5f9;
         color: #0f172a;
       }
 
-      #${MODAL_ROOT_ID}-panel-perf-btn.is-active {
+      #${MODAL_ROOT_ID}-panel-interactive-btn.is-active {
         color: #eab308;
         background: #fef08a;
+      }
+
+      /* ====== Interactive Mode ====== */
+      .mdr-global-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: bold;
+        transition: color 0.15s, transform 0.15s;
+        padding: 4px;
+        line-height: 1;
+      }
+      .mdr-global-btn:hover {
+        color: #1e293b;
+        transform: scale(1.2);
+      }
+      .mdr-global-btn:active {
+        transform: scale(0.9);
+      }
+
+      .mdr-interactive-die-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .mdr-interactive-die-wrap:hover {
+        transform: scale(1.15);
+      }
+      .mdr-interactive-die-wrap.is-popping {
+        transform: scale(1.3);
+      }
+      
+      .mdr-interactive-arrow {
+        background: transparent;
+        border: none;
+        color: #cbd5e1;
+        cursor: pointer;
+        padding: 0;
+        font-size: 14px;
+        line-height: 1;
+        transition: color 0.15s, transform 0.1s;
+      }
+      .mdr-interactive-die-wrap:hover .mdr-interactive-arrow {
+        color: #94a3b8;
+      }
+      .mdr-interactive-arrow:hover {
+        color: #1e293b !important;
+        transform: scale(1.3);
+      }
+      .mdr-interactive-arrow:active {
+        transform: scale(0.9);
       }
 
       #${MODAL_ROOT_ID}-panel.is-hidden,
@@ -1248,7 +1305,7 @@
 
       cyclePointer += 1;
       safetyTicks += 1;
-      await sleep(SPIN_INTERVAL_MS);
+      await sleep(SPAWN_INTERVAL_MS);
     }
   }
 
@@ -1334,7 +1391,7 @@
         <span id="${MODAL_ROOT_ID}-panel-title">Бросок кубиков</span>
         <div style="display: flex; gap: 4px;">
           <button type="button" id="${MODAL_ROOT_ID}-panel-theme-btn" title="Переключить тему (ПКМ - настройки)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v20"></path><path d="M2 12h20"></path></svg></button>
-          <button type="button" id="${MODAL_ROOT_ID}-panel-perf-btn" title="Режим производительности"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></button>
+          <button type="button" id="${MODAL_ROOT_ID}-panel-interactive-btn" title="Интерактивный режим"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg></button>
           <button type="button" id="${MODAL_ROOT_ID}-panel-close-btn" title="Закрыть">✕</button>
         </div>
       </div>
@@ -1363,10 +1420,12 @@
         <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-mode-custom">Кастомные</span>
       </div>
 
-      <p class="mdr-label" style="margin-top:0;">Всего кубиков</p>
-      <div class="mdr-slider-wrap" style="margin-bottom: 12px;">
-        <div class="mdr-custom-slider" id="${MODAL_ROOT_ID}-fab-count-slider"></div>
-        <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-count-value">${saved.diceCount}</span>
+      <div id="${MODAL_ROOT_ID}-total-dice-wrap">
+        <p class="mdr-label" style="margin-top:0;">Всего кубиков</p>
+        <div class="mdr-slider-wrap" style="margin-bottom: 12px;">
+          <div class="mdr-custom-slider" id="${MODAL_ROOT_ID}-fab-count-slider"></div>
+          <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-count-value">${saved.diceCount}</span>
+        </div>
       </div>
 
       <!-- D6 SECTION -->
@@ -1401,12 +1460,13 @@
           <input type="number" class="mdr-input mdr-input-small" id="${MODAL_ROOT_ID}-fab-custom-faces" min="4" max="99" value="${saved.customFaceCount}">
         </div>
 
-        <p class="mdr-label">Режим генерации</p>
-        <div class="mdr-mode-wrap" style="margin-bottom: 10px; background: #f1f5f9; padding: 4px; border-radius: 6px;">
-          <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-cmode-threshold">Порог</span>
-          <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-cmode-toggle"></button>
-          <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-cmode-exact">Грань</span>
-        </div>
+        <div id="${MODAL_ROOT_ID}-custom-logic-wrap">
+          <p class="mdr-label">Режим генерации</p>
+          <div class="mdr-mode-wrap" style="margin-bottom: 10px; background: #f1f5f9; padding: 4px; border-radius: 6px;">
+            <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-cmode-threshold">Порог</span>
+            <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-cmode-toggle"></button>
+            <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-cmode-exact">Грань</span>
+          </div>
 
         <!-- SUBSECTION: Threshold Mode -->
         <div id="${MODAL_ROOT_ID}-sub-threshold" class="mdr-sub-section" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
@@ -1441,6 +1501,7 @@
             <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-custom-exact-count-value">${saved.customExactCount}</span>
           </div>
         </div>
+        </div>
 
       </div>
 
@@ -1448,9 +1509,11 @@
         <button type="button" class="mdr-icon-btn" id="${MODAL_ROOT_ID}-preview-toggle-btn" title="Показать итог">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         </button>
+        <button type="button" class="mdr-global-btn is-hidden" id="${MODAL_ROOT_ID}-interactive-minus" title="Убрать кубик">−</button>
         <div id="${MODAL_ROOT_ID}-drag-area">
           <div id="${MODAL_ROOT_ID}-drag-preview"></div>
         </div>
+        <button type="button" class="mdr-global-btn is-hidden" id="${MODAL_ROOT_ID}-interactive-plus" title="Добавить кубик">+</button>
         <button type="button" class="mdr-icon-btn" id="${MODAL_ROOT_ID}-reroll-btn" title="Новая комбинация">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
         </button>
@@ -1464,9 +1527,14 @@
     const preview = panel.querySelector(`#${MODAL_ROOT_ID}-drag-preview`);
     const dragArea = panel.querySelector(`#${MODAL_ROOT_ID}-drag-area`);
     const rerollBtn = panel.querySelector(`#${MODAL_ROOT_ID}-reroll-btn`);
+    const previewToggleBtn = panel.querySelector(`#${MODAL_ROOT_ID}-preview-toggle-btn`);
     const header = panel.querySelector(`#${MODAL_ROOT_ID}-panel-header`);
-    const perfBtn = panel.querySelector(`#${MODAL_ROOT_ID}-panel-perf-btn`);
+    const interactiveBtn = panel.querySelector(`#${MODAL_ROOT_ID}-panel-interactive-btn`);
     const closeBtn = panel.querySelector(`#${MODAL_ROOT_ID}-panel-close-btn`);
+
+    // Interactive Mode Buttons
+    const intMinusBtn = panel.querySelector(`#${MODAL_ROOT_ID}-interactive-minus`);
+    const intPlusBtn = panel.querySelector(`#${MODAL_ROOT_ID}-interactive-plus`);
 
     // Type toggle
     const typeToggle = panel.querySelector(`#${MODAL_ROOT_ID}-fab-type-toggle`);
@@ -1608,7 +1676,6 @@
     let fabSixCount = Math.max(0, Math.min(saved.sixCount ?? 0, fabDiceCount));
     let fabStrict = saved.strictSixCount;
     let fabPreviewShowResult = saved.previewShowResult ?? false;
-    let fabPerfMode = saved.perfMode ?? false;
     let fabTheme = saved.panelTheme ?? 'solid';
     let fabGlassColor = saved.glassColor ?? '#dce6ff';
     let fabGlassOpacity = saved.glassOpacity ?? 0.6;
@@ -1622,10 +1689,12 @@
     let customFaceCount = saved.customFaceCount;
     let customMode = saved.customMode;
     let customThreshold = saved.customThreshold;
-    let customThresholdCount = Math.max(0, Math.min(saved.customThresholdCount ?? 0, fabDiceCount));
+    let customThresholdCount = saved.customThresholdCount ?? 1;
     let customDirection = saved.customDirection;
-    let customExactFace = saved.customExactFace;
-    let customExactCount = Math.max(0, Math.min(saved.customExactCount ?? 0, fabDiceCount));
+    let customExactFace = saved.customExactFace ?? 20;
+    let customExactCount = saved.customExactCount ?? 0;
+    let isInteractiveMode = saved.interactiveMode ?? false;
+    let interactiveValues = saved.interactiveValues ?? [];
 
     // Update toggle visual state
     const refreshToggleState = () => {
@@ -1634,14 +1703,18 @@
         typeToggle.classList.add('is-on');
         modeD6Label.classList.remove('is-active');
         modeCustomLabel.classList.add('is-active');
-        sectionD6.classList.add('is-hidden');
-        sectionCustom.classList.remove('is-hidden');
+        if (!isInteractiveMode) {
+          sectionD6.classList.add('is-hidden');
+          sectionCustom.classList.remove('is-hidden');
+        }
       } else {
         typeToggle.classList.remove('is-on');
         modeD6Label.classList.add('is-active');
         modeCustomLabel.classList.remove('is-active');
-        sectionD6.classList.remove('is-hidden');
-        sectionCustom.classList.add('is-hidden');
+        if (!isInteractiveMode) {
+          sectionD6.classList.remove('is-hidden');
+          sectionCustom.classList.add('is-hidden');
+        }
       }
 
       // D6 Strict Toggle
@@ -1660,14 +1733,18 @@
         customModeToggle.classList.add('is-on');
         customModeThresholdLabel.classList.remove('is-active');
         customModeExactLabel.classList.add('is-active');
-        subThreshold.classList.add('is-hidden');
-        subExact.classList.remove('is-hidden');
+        if (!isInteractiveMode) {
+          subThreshold.classList.add('is-hidden');
+          subExact.classList.remove('is-hidden');
+        }
       } else {
         customModeToggle.classList.remove('is-on');
         customModeThresholdLabel.classList.add('is-active');
         customModeExactLabel.classList.remove('is-active');
-        subThreshold.classList.remove('is-hidden');
-        subExact.classList.add('is-hidden');
+        if (!isInteractiveMode) {
+          subThreshold.classList.remove('is-hidden');
+          subExact.classList.add('is-hidden');
+        }
       }
 
       // Custom Direction Toggle
@@ -1716,7 +1793,18 @@
     let fabPerDie = [];
 
     const generateCurrentRolls = () => {
-      if (isCustomDice) {
+      if (isInteractiveMode) {
+        interactiveValues = [];
+        const maxFaces = isCustomDice ? customFaceCount : 6;
+        for (let i = 0; i < fabDiceCount; i++) {
+          interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+        }
+        if (isCustomDice) {
+          fabCustomFinalValues = [...interactiveValues];
+        } else {
+          fabFinalIndices = interactiveValues.map(v => v - 1);
+        }
+      } else if (isCustomDice) {
         fabCustomFinalValues = buildCustomFinalValues({
           diceCount: fabDiceCount,
           faceCount: customFaceCount,
@@ -1811,6 +1899,25 @@
      * Refreshes the dice preview inside the floating panel.
      */
     const refreshFabPreview = () => {
+      if (isInteractiveMode) {
+        const boxes = [...interactiveValues];
+        const isShape = isCustomDice && customFaceCount !== 6;
+        
+        preview.innerHTML = `<div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+          ${boxes.map((v, idx) => {
+            const face = isShape ? v : faceByIndex(v - 1);
+            const style = isShape 
+              ? `width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; background: #fff; border: 2px solid #e2e8f0; border-radius: 6px;`
+              : `font-size: 38px; line-height: 1;`;
+            return `<div class="mdr-interactive-die-wrap" data-idx="${idx}">
+              <button type="button" class="mdr-interactive-arrow mdr-arrow-up">▲</button>
+              <div class="mdr-die-pop mdr-interactive-die" style="${style}">${face}</div>
+              <button type="button" class="mdr-interactive-arrow mdr-arrow-down">▼</button>
+            </div>`;
+          }).join('')}
+        </div>`;
+        return;
+      }
 
       if (isCustomDice) {
         const boxes = [];
@@ -1885,7 +1992,7 @@
     // --- Full UI refresh ---
     // --- Value Popping Helper ---
     const triggerPop = (el) => {
-      if (!el || fabPerfMode) return;
+      if (!el || isInteractiveMode) return;
       el.classList.remove('is-popping');
       void el.offsetWidth; // trigger reflow
       el.classList.add('is-popping');
@@ -1944,6 +2051,35 @@
       } else {
         panel.classList.add('is-hidden');
       }
+
+      const totalDiceWrap = panel.querySelector(`#${MODAL_ROOT_ID}-total-dice-wrap`);
+      const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
+
+      if (isInteractiveMode) {
+        if (totalDiceWrap) totalDiceWrap.classList.add('is-hidden');
+        if (sectionD6) sectionD6.classList.add('is-hidden');
+        if (customLogicWrap) customLogicWrap.classList.add('is-hidden');
+        
+        // Ensure sub-threshold/sub-exact are hidden even if logic says otherwise
+        const subThreshold = panel.querySelector(`#${MODAL_ROOT_ID}-sub-threshold`);
+        const subExact = panel.querySelector(`#${MODAL_ROOT_ID}-sub-exact`);
+        if (subThreshold) subThreshold.classList.add('is-hidden');
+        if (subExact) subExact.classList.add('is-hidden');
+
+        // Toggle interactive preview buttons
+        if (intMinusBtn) intMinusBtn.classList.remove('is-hidden');
+        if (intPlusBtn) intPlusBtn.classList.remove('is-hidden');
+        if (previewToggleBtn) previewToggleBtn.classList.add('is-hidden');
+        if (rerollBtn) rerollBtn.classList.add('is-hidden');
+      } else {
+        if (totalDiceWrap) totalDiceWrap.classList.remove('is-hidden');
+        if (intMinusBtn) intMinusBtn.classList.add('is-hidden');
+        if (intPlusBtn) intPlusBtn.classList.add('is-hidden');
+        if (previewToggleBtn) previewToggleBtn.classList.remove('is-hidden');
+        if (rerollBtn) rerollBtn.classList.remove('is-hidden');
+        // Let refreshToggleState handle sectionD6, customLogicWrap, etc.
+        refreshToggleState();
+      }
     };
 
     applyVisibility();
@@ -1981,21 +2117,24 @@
 
     // --- Perf Button ---
     const updatePerfUi = () => {
-      if (perfBtn) perfBtn.classList.toggle('is-active', fabPerfMode);
-      ghostInner.classList.toggle('is-perf', fabPerfMode);
-      ghost.classList.toggle('is-perf', fabPerfMode);
-      panel.classList.toggle('mdr-perf-mode', fabPerfMode);
+      if (interactiveBtn) interactiveBtn.classList.toggle('is-active', isInteractiveMode);
+      // Removed is-perf logic as it's no longer a perf mode
+      // panel.classList.toggle('mdr-perf-mode', isInteractiveMode);
     };
-    if (perfBtn) {
-      perfBtn.addEventListener('click', (e) => {
+    if (interactiveBtn) {
+      interactiveBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        fabPerfMode = !fabPerfMode;
-        updatePerfUi();
-        saveAndPersist();
+        triggerPop(interactiveBtn);
+        isInteractiveMode = !isInteractiveMode;
+        if (isInteractiveMode) {
+          generateCurrentRolls();
+        }
+        applyVisibility();
+        refreshFabUi();
+        saveFabSettings();
       });
-      updatePerfUi();
     }
-
+    updatePerfUi();
     // --- Theme Button ---
     const themeBtn = panel.querySelector(`#${MODAL_ROOT_ID}-panel-theme-btn`);
     const themeSettingsPanel = panel.querySelector(`#${MODAL_ROOT_ID}-theme-settings`);
@@ -2394,6 +2533,87 @@
     };
 
     dragArea.addEventListener('pointerdown', startDiceDrag);
+
+    // --- Interactive Mode Events ---
+    preview.addEventListener('wheel', (e) => {
+      if (!isInteractiveMode) return;
+      const wrap = e.target.closest('.mdr-interactive-die-wrap');
+      if (wrap) {
+        e.preventDefault();
+        const idx = parseInt(wrap.getAttribute('data-idx'), 10);
+        const maxFaces = isCustomDice ? customFaceCount : 6;
+        if (e.deltaY < 0) {
+          interactiveValues[idx] = Math.min(maxFaces, interactiveValues[idx] + 1);
+        } else {
+          interactiveValues[idx] = Math.max(1, interactiveValues[idx] - 1);
+        }
+        triggerPop(wrap);
+        if (isCustomDice) fabCustomFinalValues[idx] = interactiveValues[idx];
+        else fabFinalIndices[idx] = interactiveValues[idx] - 1;
+        refreshFabPreview();
+        saveAndPersist();
+      }
+    }, { passive: false });
+
+    preview.addEventListener('pointerdown', (e) => {
+      if (!isInteractiveMode) return;
+      const arrow = e.target.closest('.mdr-interactive-arrow');
+      if (arrow) {
+        e.stopPropagation(); // prevent drag
+      }
+    });
+
+    preview.addEventListener('click', (e) => {
+      if (!isInteractiveMode) return;
+      const arrow = e.target.closest('.mdr-interactive-arrow');
+      if (arrow) {
+        e.stopPropagation();
+        const wrap = arrow.closest('.mdr-interactive-die-wrap');
+        const idx = parseInt(wrap.getAttribute('data-idx'), 10);
+        const maxFaces = isCustomDice ? customFaceCount : 6;
+        if (arrow.classList.contains('mdr-arrow-up')) {
+          interactiveValues[idx] = Math.min(maxFaces, interactiveValues[idx] + 1);
+        } else {
+          interactiveValues[idx] = Math.max(1, interactiveValues[idx] - 1);
+        }
+        triggerPop(wrap);
+        if (isCustomDice) fabCustomFinalValues[idx] = interactiveValues[idx];
+        else fabFinalIndices[idx] = interactiveValues[idx] - 1;
+        refreshFabPreview();
+        saveAndPersist();
+      }
+    });
+
+    if (intPlusBtn) {
+      intPlusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (fabDiceCount < MAX_DICE) {
+          fabDiceCount++;
+          const maxFaces = isCustomDice ? customFaceCount : 6;
+          interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+          if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+          else fabFinalIndices = interactiveValues.map(v => v - 1);
+          triggerPop(intPlusBtn);
+          refreshFabUi();
+          saveAndPersist();
+        }
+      });
+    }
+
+    if (intMinusBtn) {
+      intMinusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (fabDiceCount > MIN_DICE) {
+          fabDiceCount--;
+          interactiveValues.pop();
+          if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+          else fabFinalIndices = interactiveValues.map(v => v - 1);
+          triggerPop(intMinusBtn);
+          refreshFabUi();
+          saveAndPersist();
+        }
+      });
+    }
     document.addEventListener('pointermove', moveDiceDrag, { capture: true });
     document.addEventListener('pointerup', endDiceDrag, { capture: true });
     document.addEventListener('pointercancel', cancelDiceDrag, { capture: true });
