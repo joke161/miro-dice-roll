@@ -454,6 +454,14 @@
 
 
       /* ====== Interactive Mode ====== */
+      @keyframes mdr-die-enter {
+        0% { opacity: 0; transform: scale(0.6); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      .mdr-interactive-die-wrap {
+        animation: mdr-die-enter 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      }
+
       #${MODAL_ROOT_ID}-interactive-minus,
       #${MODAL_ROOT_ID}-interactive-plus {
         position: absolute;
@@ -2559,19 +2567,11 @@
       stopGhostPolling();
     };
 
-    const performSmoothDiceChange = (action) => {
-      if (document.startViewTransition) {
-        document.startViewTransition(() => { action(); });
-      } else {
-        action();
-      }
-    };
-
     dragArea.addEventListener('pointerdown', startDiceDrag);
 
     // --- Interactive Mode Events ---
     dragArea.addEventListener('wheel', (e) => {
-      if (!isInteractiveMode) return;
+      if (!isInteractiveMode || isDiceDragging) return;
       const wrap = e.target.closest('.mdr-interactive-die-wrap');
       if (wrap) {
         e.preventDefault();
@@ -2595,30 +2595,29 @@
         saveAndPersist();
       } else {
         e.preventDefault();
-        performSmoothDiceChange(() => {
-          if (e.deltaY < 0) {
-            if (fabDiceCount < MAX_DICE) {
-              fabDiceCount++;
-              const maxFaces = isCustomDice ? customFaceCount : 6;
-              interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
-              if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-              else fabFinalIndices = interactiveValues.map(v => v - 1);
-              refreshFabUi();
-              saveAndPersist();
-            }
-          } else {
-            if (fabDiceCount > MIN_DICE) {
-              fabDiceCount--;
-              interactiveValues.pop();
-              if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-              else fabFinalIndices = interactiveValues.map(v => v - 1);
-              refreshFabUi();
-              saveAndPersist();
-            }
+        if (e.deltaY < 0) {
+          if (fabDiceCount < MAX_DICE) {
+            fabDiceCount++;
+            const maxFaces = isCustomDice ? customFaceCount : 6;
+            interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+            else fabFinalIndices = interactiveValues.map(v => v - 1);
+            refreshFabUi();
+            saveAndPersist();
           }
-        });
+        } else {
+          if (fabDiceCount > MIN_DICE) {
+            fabDiceCount--;
+            interactiveValues.pop();
+            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+            else fabFinalIndices = interactiveValues.map(v => v - 1);
+            refreshFabUi();
+            saveAndPersist();
+          }
+        }
       }
     }, { passive: false });
+
 
     preview.addEventListener('pointerdown', (e) => {
       if (!isInteractiveMode) return;
@@ -2629,7 +2628,7 @@
     });
 
     preview.addEventListener('click', (e) => {
-      if (!isInteractiveMode) return;
+      if (!isInteractiveMode || isDiceDragging) return;
       const arrow = e.target.closest('.mdr-interactive-arrow');
       if (arrow) {
         e.stopPropagation();
@@ -2657,36 +2656,34 @@
 
     if (intPlusBtn) {
       intPlusBtn.addEventListener('click', (e) => {
+        if (isDiceDragging) return;
         e.stopPropagation();
-        performSmoothDiceChange(() => {
-          if (fabDiceCount < MAX_DICE) {
-            fabDiceCount++;
-            const maxFaces = isCustomDice ? customFaceCount : 6;
-            interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
-            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-            else fabFinalIndices = interactiveValues.map(v => v - 1);
-            triggerPop(intPlusBtn);
-            refreshFabUi();
-            saveAndPersist();
-          }
-        });
+        if (fabDiceCount < MAX_DICE) {
+          fabDiceCount++;
+          const maxFaces = isCustomDice ? customFaceCount : 6;
+          interactiveValues.push(Math.floor(Math.random() * maxFaces) + 1);
+          if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+          else fabFinalIndices = interactiveValues.map(v => v - 1);
+          triggerPop(intPlusBtn);
+          refreshFabUi();
+          saveAndPersist();
+        }
       });
     }
 
     if (intMinusBtn) {
       intMinusBtn.addEventListener('click', (e) => {
+        if (isDiceDragging) return;
         e.stopPropagation();
-        performSmoothDiceChange(() => {
-          if (fabDiceCount > MIN_DICE) {
-            fabDiceCount--;
-            interactiveValues.pop();
-            if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
-            else fabFinalIndices = interactiveValues.map(v => v - 1);
-            triggerPop(intMinusBtn);
-            refreshFabUi();
-            saveAndPersist();
-          }
-        });
+        if (fabDiceCount > MIN_DICE) {
+          fabDiceCount--;
+          interactiveValues.pop();
+          if (isCustomDice) fabCustomFinalValues = [...interactiveValues];
+          else fabFinalIndices = interactiveValues.map(v => v - 1);
+          triggerPop(intMinusBtn);
+          refreshFabUi();
+          saveAndPersist();
+        }
       });
     }
     document.addEventListener('pointermove', moveDiceDrag, { capture: true });
