@@ -2562,7 +2562,7 @@
     dragArea.addEventListener('pointerdown', startDiceDrag);
 
     // --- Interactive Mode Events ---
-    preview.addEventListener('wheel', (e) => {
+    dragArea.addEventListener('wheel', (e) => {
       if (!isInteractiveMode) return;
       const wrap = e.target.closest('.mdr-interactive-die-wrap');
       if (wrap) {
