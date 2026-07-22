@@ -317,7 +317,6 @@
       }
 
       #${MODAL_ROOT_ID}-panel {
-        view-transition-name: mdr-panel;
         position: fixed;
         z-index: 2147483645;
         display: flex;
@@ -332,7 +331,7 @@
         user-select: none;
         cursor: default;
         animation: mdr-panel-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+        transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s, width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), min-width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       }
 
       #${MODAL_ROOT_ID}-panel.mdr-theme-glass {
@@ -340,6 +339,23 @@
         backdrop-filter: blur(var(--glass-blur, 16px)) saturate(180%);
         -webkit-backdrop-filter: blur(var(--glass-blur, 16px)) saturate(180%);
         box-shadow: 0 16px 48px rgba(15, 23, 42, 0.15), inset 0 0 0 1px rgba(255,255,255,0.6), 0 0 0 1px rgba(0,0,0,0.05);
+      }
+
+      .mdr-collapse {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), margin 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 1;
+      }
+      .mdr-collapse > div {
+        overflow: hidden;
+      }
+      .mdr-collapse.is-collapsed {
+        grid-template-rows: 0fr;
+        opacity: 0;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        pointer-events: none;
       }
 
       /* Mouse spotlight glow on the background */
@@ -1443,40 +1459,54 @@
         </div>
       </div>
 
-      <div class="mdr-mode-wrap" style="margin-bottom: 10px;">
-        <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-mode-d6">Стандартные</span>
-        <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-type-toggle"></button>
-        <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-mode-custom">Кастомные</span>
+      <div id="${MODAL_ROOT_ID}-type-toggle-collapse" class="mdr-collapse" style="margin-bottom: 10px;">
+        <div>
+          <div class="mdr-mode-wrap">
+            <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-mode-d6">Стандартные</span>
+            <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-type-toggle"></button>
+            <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-mode-custom">Кастомные</span>
+          </div>
+        </div>
       </div>
 
-      <div id="${MODAL_ROOT_ID}-total-dice-wrap">
-        <p class="mdr-label" style="margin-top:0;">Всего кубиков</p>
-        <div class="mdr-slider-wrap" style="margin-bottom: 12px;">
-          <div class="mdr-custom-slider" id="${MODAL_ROOT_ID}-fab-count-slider"></div>
-          <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-count-value">${saved.diceCount}</span>
+      <div id="${MODAL_ROOT_ID}-total-dice-collapse" class="mdr-collapse">
+        <div>
+          <div id="${MODAL_ROOT_ID}-total-dice-wrap">
+            <p class="mdr-label" style="margin-top:0;">Всего кубиков</p>
+            <div class="mdr-slider-wrap" style="margin-bottom: 12px;">
+              <div class="mdr-custom-slider" id="${MODAL_ROOT_ID}-fab-count-slider"></div>
+              <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-count-value">${saved.diceCount}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- D6 SECTION -->
-      <div id="${MODAL_ROOT_ID}-section-d6" class="mdr-section">
-        <p class="mdr-label" style="margin-top:0;">Выпадет шестёрок</p>
-        <div class="mdr-slider-wrap" style="margin-bottom: 10px;">
-          <div class="mdr-custom-slider" id="${MODAL_ROOT_ID}-fab-six-slider"></div>
-          <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-six-value">${saved.sixCount ?? 0}</span>
-        </div>
+      <div id="${MODAL_ROOT_ID}-section-d6-collapse" class="mdr-collapse">
+        <div>
+          <div id="${MODAL_ROOT_ID}-section-d6" class="mdr-section">
+            <p class="mdr-label" style="margin-top:0;">Выпадет шестёрок</p>
+            <div class="mdr-slider-wrap" style="margin-bottom: 10px;">
+              <div class="mdr-custom-slider" id="${MODAL_ROOT_ID}-fab-six-slider"></div>
+              <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-six-value">${saved.sixCount ?? 0}</span>
+            </div>
 
-        <p class="mdr-label">Остальные кубики</p>
-        <div class="mdr-mode-wrap">
-          <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-mode-1-5">Только 1–5</span>
-          <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-strict-toggle"></button>
-          <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-mode-1-6">Могут быть 1–6</span>
+            <p class="mdr-label">Остальные кубики</p>
+            <div class="mdr-mode-wrap">
+              <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-mode-1-5">Только 1–5</span>
+              <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-strict-toggle"></button>
+              <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-mode-1-6">Могут быть 1–6</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- CUSTOM DICE SECTION -->
-      <div id="${MODAL_ROOT_ID}-section-custom" class="mdr-section is-hidden">
+      <div id="${MODAL_ROOT_ID}-section-custom-collapse" class="mdr-collapse is-collapsed">
+        <div>
+          <div id="${MODAL_ROOT_ID}-section-custom" class="mdr-section">
 
-        <p class="mdr-label" style="margin-top:0;">Пресеты и свои грани</p>
+            <p class="mdr-label" style="margin-top:0;">Пресеты и свои грани</p>
         <div class="mdr-custom-dice-btn-group" style="margin-bottom: 6px;">
           <button type="button" class="mdr-custom-dice-btn" data-faces="4">d4</button>
           <button type="button" class="mdr-custom-dice-btn" data-faces="6">d6</button>
@@ -1489,13 +1519,15 @@
           <input type="number" class="mdr-input mdr-input-small" id="${MODAL_ROOT_ID}-fab-custom-faces" min="4" max="99" value="${saved.customFaceCount}">
         </div>
 
-        <div id="${MODAL_ROOT_ID}-custom-logic-wrap">
-          <p class="mdr-label">Режим генерации</p>
-          <div class="mdr-mode-wrap" style="margin-bottom: 10px; background: #f1f5f9; padding: 4px; border-radius: 6px;">
-            <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-cmode-threshold">Порог</span>
-            <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-cmode-toggle"></button>
-            <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-cmode-exact">Грань</span>
-          </div>
+        <div id="${MODAL_ROOT_ID}-custom-logic-collapse" class="mdr-collapse">
+          <div>
+            <div id="${MODAL_ROOT_ID}-custom-logic-wrap">
+              <p class="mdr-label">Режим генерации</p>
+              <div class="mdr-mode-wrap" style="margin-bottom: 10px; background: #f1f5f9; padding: 4px; border-radius: 6px;">
+                <span class="mdr-mode-opt text-right" id="${MODAL_ROOT_ID}-fab-cmode-threshold">Порог</span>
+                <button type="button" class="mdr-toggle" id="${MODAL_ROOT_ID}-fab-cmode-toggle"></button>
+                <span class="mdr-mode-opt text-left" id="${MODAL_ROOT_ID}-fab-cmode-exact">Грань</span>
+              </div>
 
         <!-- SUBSECTION: Threshold Mode -->
         <div id="${MODAL_ROOT_ID}-sub-threshold" class="mdr-sub-section" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
@@ -1530,8 +1562,10 @@
             <span class="mdr-slider-value" id="${MODAL_ROOT_ID}-fab-custom-exact-count-value">${saved.customExactCount}</span>
           </div>
         </div>
+          </div>
         </div>
-
+        </div>
+        </div>
       </div>
 
       <div id="${MODAL_ROOT_ID}-preview-row" style="margin-top: 10px;">
@@ -2072,17 +2106,20 @@
         panel.classList.add('is-hidden');
       }
 
-      const totalDiceWrap = panel.querySelector(`#${MODAL_ROOT_ID}-total-dice-wrap`);
-      const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
+      const totalDiceCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-total-dice-collapse`);
+      const typeToggleCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-type-toggle-collapse`);
+      const customLogicCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-collapse`);
+      const sectionD6Collapse = panel.querySelector(`#${MODAL_ROOT_ID}-section-d6-collapse`);
+      const sectionCustomCollapse = panel.querySelector(`#${MODAL_ROOT_ID}-section-custom-collapse`);
 
       if (isInteractiveMode) {
         panel.style.width = '300px';
         panel.style.minWidth = '300px';
-        if (totalDiceWrap) totalDiceWrap.style.display = 'none';
-        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
-        if (customLogicWrap) customLogicWrap.style.display = 'none';
-        if (sectionD6) sectionD6.classList.add('is-hidden');
-        if (sectionCustom) sectionCustom.classList.remove('is-hidden');
+        if (totalDiceCollapse) totalDiceCollapse.classList.add('is-collapsed');
+        if (typeToggleCollapse) typeToggleCollapse.classList.add('is-collapsed');
+        if (customLogicCollapse) customLogicCollapse.classList.add('is-collapsed');
+        if (sectionD6Collapse) sectionD6Collapse.classList.add('is-collapsed');
+        if (sectionCustomCollapse) sectionCustomCollapse.classList.remove('is-collapsed');
 
         // Ensure sub-threshold/sub-exact are hidden even if logic says otherwise
         const subThreshold = panel.querySelector(`#${MODAL_ROOT_ID}-sub-threshold`);
@@ -2155,22 +2192,14 @@
         e.stopPropagation();
         triggerPop(interactiveBtn);
 
-        const applyToggle = () => {
-          isInteractiveMode = !isInteractiveMode;
-          if (isInteractiveMode) {
-            isCustomDice = true;
-          }
-          generateCurrentRolls();
-          applyVisibility();
-          refreshFabUi();
-          saveAndPersist();
-        };
-
-        if (document.startViewTransition) {
-          document.startViewTransition(applyToggle);
-        } else {
-          applyToggle();
+        isInteractiveMode = !isInteractiveMode;
+        if (isInteractiveMode) {
+          isCustomDice = true;
         }
+        generateCurrentRolls();
+        applyVisibility();
+        refreshFabUi();
+        saveAndPersist();
       });
     }
     updatePerfUi();
