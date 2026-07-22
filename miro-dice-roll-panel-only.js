@@ -453,8 +453,8 @@
       }
 
       #${MODAL_ROOT_ID}-panel-interactive-btn.is-active {
-        color: #eab308;
-        background: #fef08a;
+        color: #fff;
+        background: var(--accent-color, #4262ff);
       }
 
       /* ====== Interactive Mode ====== */
@@ -1267,41 +1267,55 @@
     return widgets;
   }
 
-  async function runSequentialSpinAnimation(widgets, displayValues, finalValues, faceCount, isCustom) {
-    if (!widgets || widgets.length === 0) return;
+  async function runSequentialSpinAnimation(widgets, finalValues, isCustom, faceCount) {
+    const diceCount = widgets.length;
+    const displayValues = Array.from({ length: diceCount }, () =>
+      isCustom ? randomInt(1, faceCount) : randomDieIndex()
+    );
+    const spinChangesDone = Array.from({ length: diceCount }, () => 0);
+    const frozen = Array.from({ length: diceCount }, () => false);
 
-    for (let dieIndex = 0; dieIndex < widgets.length; dieIndex += 1) {
-      for (let step = 0; step < CHANGES_PER_DIE; step += 1) {
+    let cyclePointer = 0;
+    let safetyTicks = 0;
+    const maxTicks = diceCount * (CHANGES_PER_DIE + 1) * 4;
+
+    while (!frozen.every(Boolean) && safetyTicks < maxTicks) {
+      let dieIndex = cyclePointer % diceCount;
+      let skipped = 0;
+
+      while (frozen[dieIndex] && skipped < diceCount) {
+        cyclePointer += 1;
+        dieIndex = cyclePointer % diceCount;
+        skipped += 1;
+      }
+
+      if (frozen[dieIndex]) {
+        break;
+      }
+
+      if (spinChangesDone[dieIndex] < CHANGES_PER_DIE) {
         let nextVal;
         do {
           nextVal = isCustom ? randomInt(1, faceCount) : randomDieIndex();
         } while (nextVal === displayValues[dieIndex]);
-        
         displayValues[dieIndex] = nextVal;
-        
-        const isShape = isCustom && faceCount !== 6;
-        if (isShape) {
-          await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
-        } else {
-          const faceIndex = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
-          await updateDieBlock(widgets[dieIndex], faceIndex);
-        }
-        await sleep(SPIN_INTERVAL_MS);
+        spinChangesDone[dieIndex] += 1;
+      } else {
+        displayValues[dieIndex] = finalValues[dieIndex];
+        frozen[dieIndex] = true;
       }
-      
-      // Устанавливаем финальное значение для этого кубика
-      displayValues[dieIndex] = finalValues[dieIndex];
-      const isShapeFinal = isCustom && faceCount !== 6;
-      if (isShapeFinal) {
+
+      const isShape = isCustom && faceCount !== 6;
+      if (isShape) {
         await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
       } else {
-        const faceIndexFinal = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
-        await updateDieBlock(widgets[dieIndex], faceIndexFinal);
+        const faceIndex = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
+        await updateDieBlock(widgets[dieIndex], faceIndex);
       }
-      
-      if (dieIndex < widgets.length - 1) {
-        await sleep(SPAWN_INTERVAL_MS);
-      }
+
+      cyclePointer += 1;
+      safetyTicks += 1;
+      await sleep(SPIN_INTERVAL_MS);
     }
   }
 
@@ -2043,8 +2057,8 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
-        panel.style.width = '240px';
-        panel.style.minWidth = '240px';
+        panel.style.width = '280px';
+        panel.style.minWidth = '280px';
         if (totalDiceWrap) totalDiceWrap.style.display = 'none';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
         if (customLogicWrap) customLogicWrap.style.display = 'none';
