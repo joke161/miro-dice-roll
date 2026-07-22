@@ -1764,12 +1764,13 @@
       if (fabPreviewShowResult) {
         previewToggleBtn.classList.add('is-on');
         previewToggleBtn.title = 'Скрыть итог';
-        rerollBtn.style.display = 'flex';
+        rerollBtn.style.display = isInteractiveMode ? 'none' : 'flex';
       } else {
         previewToggleBtn.classList.remove('is-on');
         previewToggleBtn.title = 'Показать итог';
         rerollBtn.style.display = 'none';
       }
+      previewToggleBtn.style.display = isInteractiveMode ? 'none' : 'flex';
     };
     previewToggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2058,6 +2059,8 @@
         if (totalDiceWrap) totalDiceWrap.classList.add('is-hidden');
         if (sectionD6) sectionD6.classList.add('is-hidden');
         if (customLogicWrap) customLogicWrap.classList.add('is-hidden');
+        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.classList.add('is-hidden');
+        if (sectionCustom) sectionCustom.classList.remove('is-hidden');
         
         // Ensure sub-threshold/sub-exact are hidden even if logic says otherwise
         const subThreshold = panel.querySelector(`#${MODAL_ROOT_ID}-sub-threshold`);
@@ -2068,14 +2071,11 @@
         // Toggle interactive preview buttons
         if (intMinusBtn) intMinusBtn.classList.remove('is-hidden');
         if (intPlusBtn) intPlusBtn.classList.remove('is-hidden');
-        if (previewToggleBtn) previewToggleBtn.classList.add('is-hidden');
-        if (rerollBtn) rerollBtn.classList.add('is-hidden');
       } else {
         if (totalDiceWrap) totalDiceWrap.classList.remove('is-hidden');
+        if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.classList.remove('is-hidden');
         if (intMinusBtn) intMinusBtn.classList.add('is-hidden');
         if (intPlusBtn) intPlusBtn.classList.add('is-hidden');
-        if (previewToggleBtn) previewToggleBtn.classList.remove('is-hidden');
-        if (rerollBtn) rerollBtn.classList.remove('is-hidden');
         // Let refreshToggleState handle sectionD6, customLogicWrap, etc.
         refreshToggleState();
       }
@@ -2126,11 +2126,12 @@
         triggerPop(interactiveBtn);
         isInteractiveMode = !isInteractiveMode;
         if (isInteractiveMode) {
-          generateCurrentRolls();
+          isCustomDice = true;
         }
+        generateCurrentRolls();
         applyVisibility();
         refreshFabUi();
-        saveFabSettings();
+        saveAndPersist();
       });
     }
     updatePerfUi();
