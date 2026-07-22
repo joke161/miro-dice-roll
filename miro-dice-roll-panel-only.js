@@ -93,7 +93,6 @@
       const customExactCount = Number.parseInt(p.customExactCount, 10);
 
       return {
-        perfMode: p.perfMode === true || p.perfMode === 'true',
         interactiveMode: p.interactiveMode === true || p.interactiveMode === 'true',
         interactiveValues: Array.isArray(p.interactiveValues) ? p.interactiveValues : [],
         diceCount: Number.isNaN(diceCount) || diceCount < MIN_DICE || diceCount > MAX_DICE ? DEFAULT_DICE_COUNT : diceCount,
@@ -2044,6 +2043,8 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
+        panel.style.width = '240px';
+        panel.style.minWidth = '240px';
         if (totalDiceWrap) totalDiceWrap.style.display = 'none';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
         if (customLogicWrap) customLogicWrap.style.display = 'none';
@@ -2079,7 +2080,6 @@
       saveFabSettings({
         interactiveMode: isInteractiveMode,
         interactiveValues: interactiveValues,
-        perfMode: fabPerfMode,
         diceCount: fabDiceCount,
         sixCount: fabSixCount,
         strictSixCount: fabStrict,
