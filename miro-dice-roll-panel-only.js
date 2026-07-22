@@ -1566,6 +1566,7 @@
         </div>
         </div>
         </div>
+        </div>
       </div>
 
       <div id="${MODAL_ROOT_ID}-preview-row" style="margin-top: 10px;">
