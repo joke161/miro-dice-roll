@@ -1903,7 +1903,7 @@
         const boxes = [...interactiveValues];
         const isShape = isCustomDice && customFaceCount !== 6;
         
-        preview.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center;">
+        preview.innerHTML = `<div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
           ${boxes.map((v, idx) => {
             const face = isShape ? v : faceByIndex(v - 1);
             
@@ -2058,6 +2058,8 @@
       const customLogicWrap = panel.querySelector(`#${MODAL_ROOT_ID}-custom-logic-wrap`);
 
       if (isInteractiveMode) {
+        panel.style.width = 'max-content';
+        panel.style.minWidth = '240px';
         if (totalDiceWrap) totalDiceWrap.style.display = 'none';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = 'none';
         if (customLogicWrap) customLogicWrap.style.display = 'none';
@@ -2074,6 +2076,8 @@
         if (intMinusBtn) intMinusBtn.style.display = 'flex';
         if (intPlusBtn) intPlusBtn.style.display = 'flex';
       } else {
+        panel.style.width = '192px';
+        panel.style.minWidth = '';
         if (totalDiceWrap) totalDiceWrap.style.display = '';
         if (typeToggle && typeToggle.parentElement) typeToggle.parentElement.style.display = '';
         if (customLogicWrap) customLogicWrap.style.display = '';
