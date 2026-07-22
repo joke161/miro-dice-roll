@@ -1201,7 +1201,7 @@
   }
 
   async function createCustomDieShape(miroSdk, value, x, y, faceCount) {
-    const textContent = String(value);
+    const textContent = faceCount === 6 ? faceByIndex(value - 1) : String(value);
     return miroSdk.board.createShape({
       shape: 'rectangle',
       content: textContent,
@@ -1224,7 +1224,7 @@
 
   async function updateCustomDieShape(widget, value, faceCount) {
     try {
-      widget.content = String(value);
+      widget.content = faceCount === 6 ? faceByIndex(value - 1) : String(value);
       await widget.sync();
     } catch {
       // Widget was deleted during animation
@@ -1246,7 +1246,7 @@
         await sleep(SPAWN_DELAY_MS);
       }
 
-      const isShape = isCustom;
+      const isShape = isCustom && faceCount !== 6;
       const { x, y } = getDieBlockPosition(
         anchorPoint.x,
         anchorPoint.y,
@@ -1266,55 +1266,41 @@
     return widgets;
   }
 
-  async function runSequentialSpinAnimation(widgets, finalValues, isCustom, faceCount) {
-    const diceCount = widgets.length;
-    const displayValues = Array.from({ length: diceCount }, () =>
-      isCustom ? randomInt(1, faceCount) : randomDieIndex()
-    );
-    const spinChangesDone = Array.from({ length: diceCount }, () => 0);
-    const frozen = Array.from({ length: diceCount }, () => false);
+  async function runSequentialSpinAnimation(widgets, displayValues, finalValues, faceCount, isCustom) {
+    if (!widgets || widgets.length === 0) return;
 
-    let cyclePointer = 0;
-    let safetyTicks = 0;
-    const maxTicks = diceCount * (CHANGES_PER_DIE + 1) * 4;
-
-    while (!frozen.every(Boolean) && safetyTicks < maxTicks) {
-      let dieIndex = cyclePointer % diceCount;
-      let skipped = 0;
-
-      while (frozen[dieIndex] && skipped < diceCount) {
-        cyclePointer += 1;
-        dieIndex = cyclePointer % diceCount;
-        skipped += 1;
-      }
-
-      if (frozen[dieIndex]) {
-        break;
-      }
-
-      if (spinChangesDone[dieIndex] < CHANGES_PER_DIE) {
+    for (let dieIndex = 0; dieIndex < widgets.length; dieIndex += 1) {
+      for (let step = 0; step < CHANGES_PER_DIE; step += 1) {
         let nextVal;
         do {
           nextVal = isCustom ? randomInt(1, faceCount) : randomDieIndex();
         } while (nextVal === displayValues[dieIndex]);
+        
         displayValues[dieIndex] = nextVal;
-        spinChangesDone[dieIndex] += 1;
-      } else {
-        displayValues[dieIndex] = finalValues[dieIndex];
-        frozen[dieIndex] = true;
+        
+        const isShape = isCustom && faceCount !== 6;
+        if (isShape) {
+          await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
+        } else {
+          const faceIndex = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
+          await updateDieBlock(widgets[dieIndex], faceIndex);
+        }
+        await sleep(SPIN_INTERVAL_MS);
       }
-
-      const isShape = isCustom;
-      if (isShape) {
+      
+      // Устанавливаем финальное значение для этого кубика
+      displayValues[dieIndex] = finalValues[dieIndex];
+      const isShapeFinal = isCustom && faceCount !== 6;
+      if (isShapeFinal) {
         await updateCustomDieShape(widgets[dieIndex], displayValues[dieIndex], faceCount);
       } else {
-        const faceIndex = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
-        await updateDieBlock(widgets[dieIndex], faceIndex);
+        const faceIndexFinal = isCustom ? displayValues[dieIndex] - 1 : displayValues[dieIndex];
+        await updateDieBlock(widgets[dieIndex], faceIndexFinal);
       }
-
-      cyclePointer += 1;
-      safetyTicks += 1;
-      await sleep(SPIN_INTERVAL_MS);
+      
+      if (dieIndex < widgets.length - 1) {
+        await sleep(SPAWN_INTERVAL_MS);
+      }
     }
   }
 
@@ -1863,7 +1849,7 @@
       // Моментальное аппаратное следование за курсором
       ghostWrapper.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
       
-      const isShape = isCustomDice;
+      const isShape = isCustomDice && customFaceCount !== 6;
       const offsetX = isShape ? (CUSTOM_DICE_BLOCK_WIDTH / 2) : (DICE_BLOCK_WIDTH / 2);
       const offsetY = isShape ? 0 : (DICE_BLOCK_WIDTH * 0.031); // Идеальное значение базлайна от пользователя
 
@@ -1910,7 +1896,7 @@
     const refreshFabPreview = () => {
       if (isInteractiveMode) {
         const boxes = [...interactiveValues];
-        const isShape = isCustomDice;
+        const isShape = isCustomDice && customFaceCount !== 6;
         
         preview.innerHTML = `<div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
           ${boxes.map((v, idx) => {
@@ -1950,29 +1936,18 @@
             .map((f) => `<span class="mdr-die-pop" style="font-size:34px;line-height:1;display:inline-block">${f}</span>`)
             .join('');
         } else {
-          // Масштабируем превью, вычисляя точные размеры, чтобы рамки не пропадали
-          const rowW = fabDiceCount * CUSTOM_DICE_BLOCK_WIDTH + (Math.max(0, fabDiceCount - 1)) * CUSTOM_DICE_GAP;
-          const MAX_PREVIEW_WIDTH = 150;
-          const MAX_PREVIEW_HEIGHT = 46;
-          const scaleX = MAX_PREVIEW_WIDTH / Math.max(1, rowW);
-          const scaleY = MAX_PREVIEW_HEIGHT / Math.max(1, CUSTOM_DICE_BLOCK_WIDTH);
-          const scale = Math.min(1, scaleX, scaleY);
-
-          const pSize = CUSTOM_DICE_BLOCK_WIDTH * scale;
-          const pGap = CUSTOM_DICE_GAP * scale;
-          // Делаем шрифт крупнее, убираем рамки, чтобы цифры лучше читались в превью
-          const pFontSize = Math.max(16, pSize * 1.2);
-
-          preview.innerHTML = `<div style="display: flex; gap: ${pGap}px; justify-content: center; align-items: center;">
+          preview.innerHTML = `<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 150px;">
             ${boxes.map((v) => `<div class="mdr-die-pop" style="
+              width: 36px;
+              height: 36px;
+              font-size: 20px;
               display: flex;
               align-items: center;
               justify-content: center;
-              width: ${pSize}px;
-              height: ${pSize}px;
-              font-family: Arial, sans-serif;
-              font-size: ${pFontSize}px;
               font-weight: bold;
+              background: #fff;
+              border: 2px solid #e2e8f0;
+              border-radius: 6px;
               box-sizing: border-box;
               color: #1a1a1a;
             ">${v}</div>`).join('')}
@@ -2003,7 +1978,7 @@
     // --- Full UI refresh ---
     // --- Value Popping Helper ---
     const triggerPop = (el) => {
-      if (!el || isInteractiveMode) return;
+      if (!el) return;
       el.classList.remove('is-popping');
       void el.offsetWidth; // trigger reflow
       el.classList.add('is-popping');
@@ -2564,10 +2539,16 @@
         } else {
           interactiveValues[idx] = Math.max(1, interactiveValues[idx] - 1);
         }
-        triggerPop(wrap);
+        
         if (isCustomDice) fabCustomFinalValues[idx] = interactiveValues[idx];
         else fabFinalIndices[idx] = interactiveValues[idx] - 1;
-        refreshFabPreview();
+        
+        const dieNode = wrap.querySelector('.mdr-die-pop');
+        if (dieNode) {
+          const isShape = isCustomDice && customFaceCount !== 6;
+          dieNode.textContent = isShape ? interactiveValues[idx] : faceByIndex(interactiveValues[idx] - 1);
+        }
+        triggerPop(wrap);
         saveAndPersist();
       }
     }, { passive: false });
@@ -2599,7 +2580,8 @@
         
         const dieNode = wrap.querySelector('.mdr-die-pop');
         if (dieNode) {
-          dieNode.textContent = isCustomDice ? interactiveValues[idx] : faceByIndex(interactiveValues[idx] - 1);
+          const isShape = isCustomDice && customFaceCount !== 6;
+          dieNode.textContent = isShape ? interactiveValues[idx] : faceByIndex(interactiveValues[idx] - 1);
         }
         triggerPop(wrap);
         saveAndPersist();
